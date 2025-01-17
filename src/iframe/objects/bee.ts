@@ -1,0 +1,77 @@
+import {realtimeVersion} from '../../shared/types/message.ts'
+import {p1} from '../index.ts'
+import {devvitPostMessage} from '../mail.ts'
+import type {Shmup} from '../scenes/shmup.ts'
+
+export class Bee extends Phaser.Physics.Arcade.Sprite {
+  override body!: Phaser.Physics.Arcade.Body
+  #isAlive: boolean = false
+  #speed: number = 100
+  #target: Phaser.Math.Vector2
+
+  constructor(scene: Shmup, x: number, y: number) {
+    super(scene, x, y, 'atlasasdasdasodjasiodioasdjoiasjdioj') // to-do: what is this arg for?
+
+    scene.add.existing(this)
+    scene.physics.add.existing(this)
+
+    this.setCircle(14, 3, 6)
+    this.setCollideWorldBounds(true)
+
+    this.#target = new Phaser.Math.Vector2()
+
+    // to-do: the importer is not setting the repeat property. how to fix?
+    this.play({key: 'bee-idle', repeat: -1})
+  }
+
+  get isAlive(): boolean {
+    return this.#isAlive
+  }
+
+  kill(): void {
+    this.#isAlive = false
+    this.body.stop()
+  }
+
+  protected override preUpdate(time: number, delta: number): void {
+    super.preUpdate(time, delta)
+    if (this.body.speed > 0 && this.#isAlive) {
+      if (
+        Phaser.Math.Distance.Between(
+          this.x,
+          this.y,
+          this.#target.x,
+          this.#target.y
+        ) < 6
+      ) {
+        this.body.reset(this.#target.x, this.#target.y)
+      }
+    }
+
+    if (this.#isAlive) {
+      this.#target.x = this.scene.input.activePointer.x
+      this.#target.y = this.scene.input.activePointer.y
+
+      if (
+        Phaser.Math.Distance.Between(
+          this.x,
+          this.y,
+          this.#target.x,
+          this.#target.y
+        ) > 1
+      ) {
+        devvitPostMessage({type: 'Peer', from: p1, version: realtimeVersion})
+        const angle = this.scene.physics.moveToObject(
+          this,
+          this.#target,
+          this.#speed
+        )
+        this.rotation = angle + Math.PI / 2
+      }
+    }
+  }
+
+  start(): void {
+    this.#isAlive = true
+  }
+}

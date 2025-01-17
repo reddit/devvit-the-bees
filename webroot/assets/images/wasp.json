@@ -1,0 +1,45 @@
+{
+  "frames": {
+    "0": {
+      "frame": { "x": 1, "y": 1, "w": 66, "h": 65 },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 63 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "duration": 50
+    },
+    "1": {
+      "frame": { "x": 135, "y": 1, "w": 50, "h": 65 },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": { "x": 8, "y": 0, "w": 48, "h": 63 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "duration": 40
+    },
+    "2": {
+      "frame": { "x": 68, "y": 1, "w": 66, "h": 65 },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 63 },
+      "sourceSize": { "w": 64, "h": 64 },
+      "duration": 100
+    }
+  },
+  "meta": {
+    "app": "http://www.aseprite.org/",
+    "version": "1.3.10-x64",
+    "image": "wasp.png",
+    "format": "RGBA8888",
+    "size": { "w": 186, "h": 67 },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "wasp-Idle",
+        "from": 0,
+        "to": 2,
+        "direction": "pingpong",
+        "color": "#000000ff"
+      }
+    ]
+  }
+}
