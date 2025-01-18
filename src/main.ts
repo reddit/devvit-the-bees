@@ -20,7 +20,7 @@ async function createPost(
 ): Promise<void> {
   const username = ctx.userId
     ? (await r2QueryProfile(ctx.reddit, T2(ctx.userId))).username
-    : 'queensorder'
+    : 'queensorders'
   const seed = PostSeedFromNothing()
   const r2Post = await r2CreatePost(ctx, seed, username)
   await redisSetPostSave(ctx.redis, PostSave(r2Post, seed))
