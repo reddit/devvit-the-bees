@@ -15,7 +15,7 @@ export function Title(props: Readonly<TitleProps>): JSX.Element {
       <vstack alignment='start' width='100%' padding='medium'>
         {/* hack: DXC-911 blocks doesn't support webp translucency. */}
         <image
-          description='chipped'
+          description='The Birds & The Bees'
           url='logo.png'
           imageWidth='171px'
           imageHeight='49px'

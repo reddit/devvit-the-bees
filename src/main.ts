@@ -9,7 +9,7 @@ Devvit.addCustomPostType({name: 'Arcade', height: 'regular', render: App})
 
 Devvit.addMenuItem({
   forUserType: ['moderator'],
-  label: 'New The Bees Post', // to-do: different label?
+  label: 'New The Birds & The Bees Post', // to-do: different label?
   location: 'subreddit',
   onPress: async (_ev, ctx) => createPost(ctx, 'UI')
 })

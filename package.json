@@ -15,7 +15,7 @@
     "node": ">=22.6"
   },
   "license": "BSD-3-Clause",
-  "name": "thebees",
+  "name": "the-bees",
   "private": true,
   "scripts": {
     "build": "esbuild --bundle --format=esm --log-level=info --outfile=webroot/index.js src/iframe/index.ts",

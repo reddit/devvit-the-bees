@@ -23,7 +23,7 @@ export async function r2CreatePost(
   const post = await ctx.reddit.submitPost({
     preview: <Preview />,
     subredditName: ctx.subredditName,
-    title: '🐝 The Bees Order #0' // to-do: fix me.
+    title: "🐝 The Queen's Order #0" // to-do: fix me.
   })
 
   console.log(`post by ${username}`)
