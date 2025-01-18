@@ -21,7 +21,7 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
     this.#target = new Phaser.Math.Vector2()
 
     // to-do: the importer is not setting the repeat property. how to fix?
-    this.play({key: 'bee-idle', repeat: -1})
+    this.play('bee--Idle')
   }
 
   get isAlive(): boolean {
@@ -60,7 +60,7 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
           this.#target.y
         ) > 1
       ) {
-        devvitPostMessage({type: 'Peer', from: p1, version: realtimeVersion})
+        devvitPostMessage({type: 'Peer', peer: p1, version: realtimeVersion})
         const angle = this.scene.physics.moveToObject(
           this,
           this.#target,

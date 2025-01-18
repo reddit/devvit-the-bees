@@ -36,7 +36,7 @@ export type PeerMessage = {type: 'Peer'} & RealtimeMessage
 
 /** base realtime message sent or received. */
 export type RealtimeMessage = {
-  from: Player
+  peer: Player
   /** message schema version. */
   version: number
 }

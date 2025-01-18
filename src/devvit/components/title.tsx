@@ -13,12 +13,12 @@ export function Title(props: Readonly<TitleProps>): JSX.Element {
       height='100%'
     >
       <vstack alignment='start' width='100%' padding='medium'>
-        {/* hack: DXC-911 blocks doesn't support webp translucency. */}
         <image
           description='The Birds & The Bees'
           url='logo.png'
-          imageWidth='171px'
-          imageHeight='49px'
+          imageWidth='600px'
+          imageHeight='342px'
+          resizeMode='scale-down'
         />
       </vstack>
       <vstack

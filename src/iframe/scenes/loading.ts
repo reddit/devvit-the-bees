@@ -1,3 +1,8 @@
+// hack: this costs us a lot. we shouldn't need unprocessed JSON, only a Phaser
+//       config and we shouldn't need both a copy bundled in JS and another in
+//       a downloaded webroot/asset.
+import atlas from '../../../webroot/assets/images/atlas.json'
+
 import {minCanvasWH} from '../../shared/theme.ts'
 import {devvitPostMessage} from '../mail.ts'
 import {Title} from './title.ts'
@@ -8,9 +13,12 @@ export class Loading extends Phaser.Scene {
   }
 
   create(): void {
-    // to-do: the importer is not setting the repeat property. how to fix?
-    console.log(this.anims.createFromAseprite('atlas'))
-    this.anims.createFromAseprite('wasp')
+    // hack: Phaser's importer doesn't honor animation loop counts.
+    for (const anim of this.anims.createFromAseprite('atlas')) {
+      const tag = atlas.meta.frameTags.find(tag => tag.name === anim.key)
+      if (!tag) throw Error(`no tag for ${anim.key}`)
+      anim.repeat = 'repeat' in tag ? (tag.repeat as number) : -1
+    }
 
     this.scene.start(Title.name)
     devvitPostMessage({type: 'Loaded'})
@@ -24,9 +32,6 @@ export class Loading extends Phaser.Scene {
     // load data.
     this.load.setPath('assets')
     this.load.audio('doot', 'sounds/doot.mp3')
-    // to-do: is there a better to separate animations across different
-    //        characters?
     this.load.aseprite('atlas', 'images/atlas.png', 'images/atlas.json')
-    this.load.aseprite('wasp', 'images/wasp.png', 'images/wasp.json') // to-do: combine atlas.
   }
 }

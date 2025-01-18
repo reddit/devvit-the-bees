@@ -17,9 +17,9 @@ export class WaspGroup extends Phaser.Physics.Arcade.Group {
   }
 
   start(): void {
-    const wasp1 = new Wasp(this.scene, 100, 100, 'wasp', 0)
-    const wasp2 = new Wasp(this.scene, 700, 600, 'wasp', 0)
-    const wasp3 = new Wasp(this.scene, 200, 400, 'wasp', 0)
+    const wasp1 = new Wasp(this.scene, 100, 100, 'atlas', 0)
+    const wasp2 = new Wasp(this.scene, 700, 600, 'atlas', 0)
+    const wasp3 = new Wasp(this.scene, 200, 400, 'atlas', 0)
 
     this.add(wasp1, true)
     this.add(wasp2, true)

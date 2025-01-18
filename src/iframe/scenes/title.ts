@@ -17,10 +17,10 @@ export class Title extends Phaser.Scene {
       this.scale.height - 64
     )
 
-    this.#addWasp(area, 'wasp-Idle')
-    this.#addWasp(area, 'wasp-Idle')
-    this.#addWasp(area, 'wasp-Idle')
-    this.#addWasp(area, 'wasp-Idle')
+    this.#addWasp(area, 'wasp--Idle')
+    this.#addWasp(area, 'wasp--Idle')
+    this.#addWasp(area, 'wasp--Idle')
+    this.#addWasp(area, 'wasp--Idle')
 
     this.input.on('pointerdown', () => {
       this.scene.start(Shmup.name)
@@ -28,12 +28,10 @@ export class Title extends Phaser.Scene {
     })
   }
 
-  #addWasp(area: Phaser.Geom.Rectangle, animation: 'wasp-Idle'): void {
+  #addWasp(area: Phaser.Geom.Rectangle, animation: 'wasp--Idle'): void {
     const start = area.getRandomPoint()
 
-    const wasp = this.add
-      .sprite(start.x, start.y, animation)
-      .play({key: animation, repeat: -1})
+    const wasp = this.add.sprite(start.x, start.y, animation).play(animation)
 
     const durationX = Phaser.Math.Between(4000, 6000)
     const durationY = durationX + 3000

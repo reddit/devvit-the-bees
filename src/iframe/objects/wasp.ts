@@ -17,7 +17,7 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
   ) {
     super(scene, x, y, animation)
 
-    this.play({key: 'wasp-Idle', repeat: -1}) // to-do: fix Aseprite importer.
+    this.play('wasp--Idle')
 
     this.setScale(Phaser.Math.FloatBetween(0.5, 2))
 

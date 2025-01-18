@@ -70,15 +70,15 @@ export function useChannel2<T extends JSONObject>(
   const chan = useChannel<T & RealtimeMessage>({
     name: opts.chan,
     onMessage(msg) {
-      if (!(msg.from.sid in peers)) {
+      if (!(msg.peer.sid in peers)) {
         setPeers(peers => {
-          peers[msg.from.sid] = {player: msg.from, peered: utcMillisNow()}
+          peers[msg.peer.sid] = {player: msg.peer, peered: utcMillisNow()}
           return peers
         })
-        opts.onPeerJoin?.(msg.from)
+        opts.onPeerJoin?.(msg.peer)
       }
       // omit messages received from self (but update peer map first).
-      if (msg.from.sid === opts.p1.sid) return
+      if (msg.peer.sid === opts.p1.sid) return
       if (msg.version === opts.version) opts.onMessage(msg)
       else if (msg.version > opts.version)
         console.info(`ignored v${msg.version} message`)
@@ -98,7 +98,7 @@ export function useChannel2<T extends JSONObject>(
     async send(msg) {
       chan.send({
         ...msg,
-        from: opts.p1,
+        peer: opts.p1,
         version: opts.version
       } satisfies RealtimeMessage)
     }

@@ -1,48 +1,90 @@
 {
   "frames": {
-    "bee--Idle--0": {
+    "0": {
+      "frame": {
+        "x": 67,
+        "y": 112,
+        "w": 56,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 5,
+        "y": 13,
+        "w": 54,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 64
+      },
+      "duration": 60
+    },
+    "1": {
       "frame": {
         "x": 1,
         "y": 67,
-        "w": 34,
-        "h": 31
+        "w": 65,
+        "h": 51
       },
       "rotated": false,
       "trimmed": true,
       "spriteSourceSize": {
-        "x": 0,
-        "y": 3,
-        "w": 32,
-        "h": 29
+        "x": 1,
+        "y": 6,
+        "w": 63,
+        "h": 49
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 64,
+        "h": 64
       },
-      "duration": 100
+      "duration": 50
     },
-    "bee--Idle--1": {
+    "2": {
       "frame": {
-        "x": 36,
+        "x": 67,
         "y": 67,
-        "w": 34,
-        "h": 31
+        "w": 65,
+        "h": 44
       },
       "rotated": false,
       "trimmed": true,
       "spriteSourceSize": {
-        "x": 0,
-        "y": 3,
-        "w": 32,
-        "h": 29
+        "x": 1,
+        "y": 13,
+        "w": 63,
+        "h": 42
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 64,
+        "h": 64
       },
-      "duration": 100
+      "duration": 20
     },
-    "wasp--Idle--0": {
+    "3": {
+      "frame": {
+        "x": 133,
+        "y": 67,
+        "w": 57,
+        "h": 49
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 4,
+        "y": 8,
+        "w": 55,
+        "h": 47
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 64
+      },
+      "duration": 50
+    },
+    "4": {
       "frame": {
         "x": 1,
         "y": 1,
@@ -63,7 +105,7 @@
       },
       "duration": 50
     },
-    "wasp--Idle--1": {
+    "5": {
       "frame": {
         "x": 135,
         "y": 1,
@@ -84,7 +126,7 @@
       },
       "duration": 40
     },
-    "wasp--Idle--2": {
+    "6": {
       "frame": {
         "x": 68,
         "y": 1,
@@ -112,22 +154,22 @@
     "image": "atlas.png",
     "format": "RGBA8888",
     "size": {
-      "w": 186,
-      "h": 99
+      "w": 191,
+      "h": 157
     },
     "scale": "1",
     "frameTags": [
       {
         "name": "bee--Idle",
         "from": 0,
-        "to": 1,
+        "to": 3,
         "direction": "forward",
         "color": "#000000ff"
       },
       {
         "name": "wasp--Idle",
-        "from": 0,
-        "to": 2,
+        "from": 4,
+        "to": 6,
         "direction": "pingpong",
         "color": "#000000ff"
       }
