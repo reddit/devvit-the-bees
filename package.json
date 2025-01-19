@@ -18,8 +18,8 @@
   "name": "the-bees",
   "private": true,
   "scripts": {
-    "build": "esbuild --bundle --format=esm --log-level=info --outfile=webroot/index.js src/iframe/index.ts",
-    "clean": "rm -rf dist webroot/index.js",
+    "build": "tools/atlas-pack.ts && esbuild --bundle --format=esm --log-level=info --outfile=webroot/index.js src/iframe/index.ts",
+    "clean": "rm -rf dist webroot/assets/images/atlas.* webroot/index.js",
     "devvit:install": "npm run clean && npm run build && devvit upload && devvit install r/thebees",
     "devvit:logs": "devvit logs --log-runtime r/thebeesdev",
     "devvit:playtest": "devvit playtest --config=devvit.dev.yaml --log-runtime r/thebeesdev|grep --invert --line-buffered '\\[api\\]'",
