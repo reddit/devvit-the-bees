@@ -1,4 +1,5 @@
 import {
+  Devvit,
   type JSONObject,
   type UseChannelResult,
   useChannel,
@@ -10,6 +11,8 @@ import type {SID} from '../../shared/types/sid.ts'
 import type {T3} from '../../shared/types/tid.ts'
 import {type UTCMillis, utcMillisNow} from '../../shared/types/time.ts'
 import {useState2} from './use-state2.ts'
+
+Devvit.configure({realtime: true})
 
 export type UseChannel2Opts<T extends RealtimeMessage & JSONObject> = {
   /**

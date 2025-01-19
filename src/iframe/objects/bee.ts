@@ -1,16 +1,17 @@
 import {realtimeVersion} from '../../shared/types/message.ts'
-import {p1} from '../index.ts'
-import {devvitPostMessage} from '../mail.ts'
-import type {Shmup} from '../scenes/shmup.ts'
+import type {Game} from '../game.ts'
+import {postWebViewMessage} from '../mail.ts'
 
 export class Bee extends Phaser.Physics.Arcade.Sprite {
   override body!: Phaser.Physics.Arcade.Body
+  #game: Game
   #isAlive: boolean = false
   #speed: number = 100
   #target: Phaser.Math.Vector2
 
-  constructor(scene: Shmup, x: number, y: number) {
-    super(scene, x, y, 'atlasasdasdasodjasiodioasdjoiasjdioj') // to-do: what is this arg for?
+  constructor(scene: Phaser.Scene, x: number, y: number, game: Game) {
+    super(scene, x, y, '')
+    this.#game = game
 
     scene.add.existing(this)
     scene.physics.add.existing(this)
@@ -60,7 +61,12 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
           this.#target.y
         ) > 1
       ) {
-        devvitPostMessage({type: 'Peer', peer: p1, version: realtimeVersion})
+        postWebViewMessage(this.#game, {
+          type: 'Peer',
+          peer: this.#game.p1,
+          taps: [],
+          version: realtimeVersion
+        })
         const angle = this.scene.physics.moveToObject(
           this,
           this.#target,

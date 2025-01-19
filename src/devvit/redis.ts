@@ -1,6 +1,6 @@
 import type {JobContext, RedisClient} from '@devvit/public-api'
 import {NoProfile, type PostSave, type Profile} from '../shared/save.ts'
-import {type T2, noT2} from '../shared/types/tid.ts'
+import {type T2, type T3, noT2} from '../shared/types/tid.ts'
 import {r2QueryProfile} from './r2.tsx'
 
 /** Redis is 10000x faster than R2 or fetch. */
@@ -10,6 +10,14 @@ const profileByT2Key: string = 'profile_by_t2'
 
 /** immutable PostSave by post ID. */
 const postSaveByT3Key: string = 'post_save_by_t3'
+
+export async function redisQueryPostSave(
+  redis: RedisClient,
+  t3: T3
+): Promise<PostSave | undefined> {
+  const json = await redis.hGet(postSaveByT3Key, t3)
+  if (json) return JSON.parse(json)
+}
 
 /** get or create profile. */
 export async function redisQueryProfile(

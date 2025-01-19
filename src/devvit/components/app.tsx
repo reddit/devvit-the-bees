@@ -12,21 +12,33 @@ import {useChannel2} from '../hooks/use-channel2.js'
 import {useSession} from '../hooks/use-session.ts'
 import {useState2} from '../hooks/use-state2.ts'
 import {useWebView2} from '../hooks/use-web-view2.ts'
-import {redisQueryProfile} from '../redis.ts'
+import {redisQueryPostSave, redisQueryProfile} from '../redis.ts'
 import {Title} from './title.tsx'
 
 export function App(ctx: Devvit.Context): JSX.Element {
   const session = useSession(ctx)
   const [profile] = useState2(() => redisQueryProfile(ctx, session.t2))
   const p1 = {profile, sid: session.sid}
+  const [postSave] = useState2(async () => {
+    const postSave = await redisQueryPostSave(ctx.redis, session.t3)
+    if (!postSave) throw Error(`no post save for ${session.t3}`)
+    return postSave
+  })
+
   const webView = useWebView2<WebViewMessage, DevvitMessage>({
     onMessage(msg) {
       if (session.debug)
-        console.log(`${profile.username} App.onMessage=${JSON.stringify(msg)}`)
+        console.log(`${profile.username} App msg=${JSON.stringify(msg)}`)
 
       switch (msg.type) {
-        case 'Loaded':
-          // to-do: implement.
+        case 'Listening':
+          webView.postMessage({
+            type: 'Init',
+            debug: session.debug,
+            p1,
+            seed: postSave.seed
+          })
+          chan.subscribe() // to-do: verify platform unsubscribes hidden posts.
           break
         case 'NewGame':
           // to-do: implement.
@@ -53,7 +65,6 @@ export function App(ctx: Devvit.Context): JSX.Element {
     onSubscribed: () => webView.postMessage({type: 'Connected'}),
     onUnsubscribed: () => webView.postMessage({type: 'Disconnected'})
   })
-  chan.subscribe() // to-do: verify platform unsubscribes hidden posts.
 
   return (
     <Title>

@@ -4,23 +4,26 @@
 import atlas from '../../../webroot/assets/images/atlas.json'
 
 import {minCanvasWH} from '../../shared/theme.ts'
-import {devvitPostMessage} from '../mail.ts'
+import type {Game} from '../game.ts'
 import {Title} from './title.ts'
 
 export class Loading extends Phaser.Scene {
-  constructor() {
+  #game: Game
+
+  constructor(game: Game) {
     super(new.target.name)
+    this.#game = game
   }
 
   create(): void {
     // hack: Phaser's importer doesn't read animation loop counts.
     for (const anim of this.anims.createFromAseprite('atlas')) {
-      const tag = atlas.meta.frameTags.find(tag => tag.name === anim.key)!
+      const tag = atlas.meta.frameTags.find(tag => tag.name === anim.key)
+      if (!tag) throw Error(`no ${anim.key} tag`)
       anim.repeat = 'repeat' in tag ? (tag.repeat as number) : -1
     }
 
-    this.scene.start(Title.name)
-    devvitPostMessage({type: 'Loaded'})
+    void this.#game.init.then(() => this.scene.start(Title.name))
   }
 
   preload(): void {

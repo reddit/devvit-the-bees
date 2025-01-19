@@ -8,18 +8,12 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
   #isChasing: boolean = false
   #target: Phaser.Math.Vector2 = new Phaser.Math.Vector2()
 
-  constructor(
-    scene: Shmup,
-    x: number,
-    y: number,
-    animation: string,
-    speed: number
-  ) {
-    super(scene, x, y, animation)
+  constructor(scene: Shmup, x: number, y: number, speed: number) {
+    super(scene, x, y, '')
 
     this.play('wasp--Idle')
 
-    this.setScale(Phaser.Math.FloatBetween(0.5, 2))
+    // this.setScale(Phaser.Math.FloatBetween(0.5, 2))
 
     this.#speed = speed
   }
@@ -34,7 +28,7 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
       ease: 'Linear',
       hold: Phaser.Math.RND.between(3000, 8000),
       onComplete: () => {
-        if (this.scene.player.isAlive) {
+        if (this.scene.bee.isAlive) {
           this.#lifespan = Phaser.Math.RND.between(6000, 12000)
           this.#isChasing = true
         }

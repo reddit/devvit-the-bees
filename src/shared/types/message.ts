@@ -1,6 +1,10 @@
 import type {Player, PostSeed} from '../save.ts'
+import type {XY} from './2d.ts'
 
-/** a message from blocks to the iframe. */
+/**
+ * a message from blocks to the iframe. Init always arrived first, usually
+ * followed by Connected.
+ */
 export type DevvitMessage =
   | {
       /**
@@ -26,13 +30,13 @@ export type DevvitSystemMessage = {
 
 /** a message from the iframe to devvit. */
 export type WebViewMessage =
-  | {type: 'Loaded'}
+  | {type: 'Listening'}
   | {p1: Player; type: 'NewGame'}
   | {p1: Player; type: 'Save'}
   | PeerMessage
 
 /** a realtime message from another instance. */
-export type PeerMessage = {type: 'Peer'} & RealtimeMessage
+export type PeerMessage = {type: 'Peer'; taps: XY[]} & RealtimeMessage
 
 /** base realtime message sent or received. */
 export type RealtimeMessage = {

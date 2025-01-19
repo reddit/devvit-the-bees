@@ -3,11 +3,11 @@ import {Wasp} from './wasp.js'
 
 export class WaspGroup extends Phaser.Physics.Arcade.Group {
   override scene!: Shmup
-  #waspAnimConfig: {readonly animation: string; readonly speed: number}[] = [
-    {animation: 'Idle', speed: 60},
-    {animation: 'Idle', speed: 90},
-    {animation: 'Idle', speed: 120},
-    {animation: 'Idle', speed: 180}
+  #waspAnimConfig: {readonly speed: number}[] = [
+    {speed: 60},
+    {speed: 90},
+    {speed: 120},
+    {speed: 180}
   ]
   #timedEvent!: Phaser.Time.TimerEvent
 
@@ -17,9 +17,9 @@ export class WaspGroup extends Phaser.Physics.Arcade.Group {
   }
 
   start(): void {
-    const wasp1 = new Wasp(this.scene, 100, 100, 'atlas', 0)
-    const wasp2 = new Wasp(this.scene, 700, 600, 'atlas', 0)
-    const wasp3 = new Wasp(this.scene, 200, 400, 'atlas', 0)
+    const wasp1 = new Wasp(this.scene, 100, 100, 0)
+    const wasp2 = new Wasp(this.scene, 700, 600, 0)
+    const wasp3 = new Wasp(this.scene, 200, 400, 0)
 
     this.add(wasp1, true)
     this.add(wasp2, true)
@@ -47,19 +47,15 @@ export class WaspGroup extends Phaser.Physics.Arcade.Group {
     const x = Phaser.Math.RND.between(0, 800)
     const y = Phaser.Math.RND.between(0, 600)
 
-    let wasp: Wasp | undefined
-
     const config = Phaser.Math.RND.pick(this.#waspAnimConfig)
 
-    for (const child of this.getChildren() as Wasp[]) {
-      if (child.anims.getName() === config.animation && !child.active) {
-        wasp = child
-      }
-    }
+    let wasp = this.getChildren().find(child => !child.active) as
+      | Wasp
+      | undefined
 
     if (wasp) wasp.restart(x, y)
     else {
-      wasp = new Wasp(this.scene, x, y, config.animation, config.speed)
+      wasp = new Wasp(this.scene, x, y, config.speed)
 
       this.add(wasp, true)
 
