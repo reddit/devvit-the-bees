@@ -1,6 +1,6 @@
 // hack: this costs us a lot. we shouldn't need unprocessed JSON, only a Phaser
-//       config and we shouldn't need both a copy bundled in JS and another in
-//       a downloaded webroot/asset.
+//       config and we shouldn't need both a copy bundled in JS and another
+//       downloaded from webroot/asset.
 import atlas from '../../../webroot/assets/images/atlas.json'
 
 import {minCanvasWH} from '../../shared/theme.ts'
@@ -9,14 +9,13 @@ import {Title} from './title.ts'
 
 export class Loading extends Phaser.Scene {
   constructor() {
-    super(Loading.name)
+    super(new.target.name)
   }
 
   create(): void {
-    // hack: Phaser's importer doesn't honor animation loop counts.
+    // hack: Phaser's importer doesn't read animation loop counts.
     for (const anim of this.anims.createFromAseprite('atlas')) {
-      const tag = atlas.meta.frameTags.find(tag => tag.name === anim.key)
-      if (!tag) throw Error(`no tag for ${anim.key}`)
+      const tag = atlas.meta.frameTags.find(tag => tag.name === anim.key)!
       anim.repeat = 'repeat' in tag ? (tag.repeat as number) : -1
     }
 

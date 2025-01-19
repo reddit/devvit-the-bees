@@ -3,7 +3,7 @@ import {Shmup} from './shmup.ts'
 
 export class Title extends Phaser.Scene {
   constructor() {
-    super(Title.name)
+    super(new.target.name)
   }
 
   create(): void {

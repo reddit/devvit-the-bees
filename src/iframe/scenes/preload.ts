@@ -6,7 +6,7 @@ import {Loading} from './loading.ts'
  */
 export class Preload extends Phaser.Scene {
   constructor() {
-    super(Preload.name)
+    super(new.target.name)
   }
 
   create(): void {

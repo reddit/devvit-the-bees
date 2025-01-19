@@ -2,7 +2,7 @@ import {Title} from './title.ts'
 
 export class GameOver extends Phaser.Scene {
   constructor() {
-    super(GameOver.name)
+    super(new.target.name)
   }
 
   create(): void {

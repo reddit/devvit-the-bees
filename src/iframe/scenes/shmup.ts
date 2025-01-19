@@ -9,7 +9,7 @@ export class Shmup extends Phaser.Scene {
   #wasps!: WaspGroup
 
   constructor() {
-    super(Shmup.name)
+    super(new.target.name)
   }
 
   create(): void {
