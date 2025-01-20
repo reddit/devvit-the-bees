@@ -41,13 +41,15 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
     this.#target.x = xy.x
     this.#target.y = this.y
 
+    // to-do: detect desktop, disable point movement, and enable wasd.
     if (
       Phaser.Math.Distance.Between(
         this.x,
         this.y,
         this.#target.x,
         this.#target.y
-      ) > 10 &&
+      ) >
+        this.width / 2 &&
       this.#isAlive &&
       pointer.isDown
     ) {

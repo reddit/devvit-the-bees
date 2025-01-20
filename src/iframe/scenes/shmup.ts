@@ -21,7 +21,7 @@ export class Shmup extends Phaser.Scene {
 
     this.#wasps = new WaspGroup(this.physics.world, this)
     this.bee = new Bee(this, 0, 0, this.#game)
-    this.bee.x = cam.width / 2 - this.bee.width / 2
+    this.bee.x = cam.width / 2 - this.bee.width
     this.bee.y = cam.height - this.bee.height / 2
 
     this.bee.start()
