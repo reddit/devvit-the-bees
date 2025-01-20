@@ -8,7 +8,6 @@ export class Title extends Phaser.Scene {
   }
 
   create(): void {
-    centerCam(this)
     this.add.image(minCanvasWH.w / 2, minCanvasWH.h / 2, 'background')
     this.add.text(0, 0, 'title')
 
@@ -28,6 +27,10 @@ export class Title extends Phaser.Scene {
       this.scene.start(Shmup.name)
       this.sound.play('doot')
     })
+  }
+
+  init(): void {
+    centerCam(this)
   }
 
   #addWasp(area: Phaser.Geom.Rectangle, animation: 'wasp--Idle'): void {

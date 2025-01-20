@@ -16,7 +16,6 @@ export class Shmup extends Phaser.Scene {
   }
 
   create(): void {
-    centerCam(this)
     this.add.image(minCanvasWH.w / 2, minCanvasWH.h / 2, 'background')
 
     this.#wasps = new WaspGroup(this.physics.world, this)
@@ -26,12 +25,16 @@ export class Shmup extends Phaser.Scene {
     this.#wasps.start()
 
     this.physics.add.overlap(this.bee, this.#wasps, (bee, wasp) =>
-      this.onBeeHitWasp(bee as Bee, wasp as Wasp)
+      this.#onBeeHitWasp(bee as Bee, wasp as Wasp)
     )
   }
 
+  init(): void {
+    centerCam(this)
+  }
+
   // to-do: can this move to Bee?
-  onBeeHitWasp(bee: Bee, wasp: Wasp): void {
+  #onBeeHitWasp(bee: Bee, wasp: Wasp): void {
     if (bee.isAlive && wasp.alpha === 1) {
       this.bee.kill()
       this.#wasps.stop()

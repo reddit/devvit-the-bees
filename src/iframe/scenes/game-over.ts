@@ -6,8 +6,11 @@ export class GameOver extends Phaser.Scene {
     super(new.target.name)
   }
 
-  create(): void {
+  init(): void {
     centerCam(this)
+  }
+
+  create(): void {
     this.add.text(0, 0, 'game over')
     this.input.on('pointerdown', () => this.scene.start(Title.name))
   }

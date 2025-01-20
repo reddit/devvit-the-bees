@@ -16,7 +16,6 @@ export class Loading extends Phaser.Scene {
   }
 
   create(): void {
-    centerCam(this)
     // hack: Phaser's importer doesn't read animation loop counts.
     for (const anim of this.anims.createFromAseprite('atlas')) {
       const tag = atlas.meta.frameTags.find(tag => tag.name === anim.key)
@@ -25,6 +24,10 @@ export class Loading extends Phaser.Scene {
     }
 
     void this.#game.init.then(() => this.scene.start(Title.name))
+  }
+
+  init(): void {
+    centerCam(this)
   }
 
   preload(): void {

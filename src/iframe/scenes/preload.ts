@@ -11,12 +11,15 @@ export class Preload extends Phaser.Scene {
   }
 
   create(): void {
-    centerCam(this)
     this.scene.start(Loading.name)
   }
 
-  preload(): void {
+  init(): void {
+    centerCam(this)
     this.add.text(0, 0, 'preloading')
+  }
+
+  preload(): void {
     this.load.setPath('assets')
     this.load.image('background', 'images/background.png')
   }

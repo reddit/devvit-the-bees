@@ -161,6 +161,6 @@ export class Game {
 }
 
 export function centerCam(scene: Phaser.Scene): void {
-  scene.cameras.main.x = (scene.scale.gameSize.width - minCanvasWH.w) / 2
-  scene.cameras.main.y = (scene.scale.gameSize.height - minCanvasWH.h) / 2
+  scene.cameras.main.x = (scene.scale.width - minCanvasWH.w) / 2
+  scene.cameras.main.y = (scene.scale.height - minCanvasWH.h) / 2
 }
