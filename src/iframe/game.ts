@@ -47,14 +47,7 @@ export class Game {
       // width: '100%'
     }
     this.phaser = new Phaser.Game(config)
-    this.phaser.scale.on(
-      'resize',
-      (
-        gameSize: Phaser.Structs.Size,
-        canvasSize: Phaser.Structs.Size,
-        displaySize: Phaser.Structs.Size
-      ) => this.#onResize(gameSize, canvasSize, displaySize)
-    )
+    this.phaser.scale.on('resize', () => this.#onResize())
   }
 
   start(): void {
@@ -145,11 +138,7 @@ export class Game {
     }
   }
 
-  #onResize(
-    _gameSize: Phaser.Structs.Size,
-    _canvasSize: Phaser.Structs.Size,
-    _displaySize: Phaser.Structs.Size
-  ): void {
+  #onResize(): void {
     for (const scene of this.phaser.scene.getScenes()) centerCam(scene)
   }
 }

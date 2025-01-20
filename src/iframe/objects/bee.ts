@@ -2,11 +2,12 @@ import {realtimeVersion} from '../../shared/types/message.ts'
 import type {Game} from '../game.ts'
 import {postWebViewMessage} from '../mail.ts'
 
+const speed: number = 20
+
 export class Bee extends Phaser.Physics.Arcade.Sprite {
   override body!: Phaser.Physics.Arcade.Body
   #game: Game
   #isAlive: boolean = false
-  #speed: number = 100
   #target: Phaser.Math.Vector2
 
   constructor(scene: Phaser.Scene, x: number, y: number, game: Game) {
@@ -16,7 +17,7 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this)
     scene.physics.add.existing(this)
 
-    this.#target = new Phaser.Math.Vector2()
+    this.#target = new Phaser.Math.Vector2(x, y)
 
     this.play('bee--Idle')
   }
@@ -32,45 +33,27 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
 
   protected override preUpdate(time: number, delta: number): void {
     super.preUpdate(time, delta)
-    if (this.body.speed > 0 && this.#isAlive) {
-      if (
-        Phaser.Math.Distance.Between(
-          this.x,
-          this.y,
-          this.#target.x,
-          this.#target.y
-        ) < 6
-      ) {
-        this.body.reset(this.#target.x, this.#target.y)
-      }
-    }
 
-    if (this.#isAlive) {
-      this.#target.x = this.scene.input.activePointer.x - (this.width * 5) / 8
-      this.#target.y = this.scene.input.activePointer.y
+    this.#target.x = this.scene.input.activePointer.x - (this.width * 5) / 8
+    this.#target.y = this.y
 
-      if (
-        Phaser.Math.Distance.Between(
-          this.x,
-          this.y,
-          this.#target.x,
-          this.#target.y
-        ) > 1
-      ) {
-        postWebViewMessage(this.#game, {
-          type: 'Peer',
-          peer: this.#game.p1,
-          taps: [],
-          version: realtimeVersion
-        })
-        const angle = this.scene.physics.moveToObject(
-          this,
-          this.#target,
-          this.#speed
-        )
-        this.rotation = angle + Math.PI / 2
-      }
-    }
+    if (
+      Phaser.Math.Distance.Between(
+        this.x,
+        this.y,
+        this.#target.x,
+        this.#target.y
+      ) > 1 &&
+      this.#isAlive
+    ) {
+      this.scene.physics.moveToObject(this, this.#target, speed)
+      postWebViewMessage(this.#game, {
+        type: 'Peer',
+        peer: this.#game.p1,
+        taps: [],
+        version: realtimeVersion
+      })
+    } else if (this.#isAlive && this.body.speed) this.body.reset(this.x, this.y)
   }
 
   start(): void {
