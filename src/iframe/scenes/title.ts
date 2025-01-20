@@ -25,7 +25,6 @@ export class Title extends Phaser.Scene {
 
     this.input.on('pointerdown', () => {
       this.scene.start(Shmup.name)
-      this.sound.play('doot')
     })
   }
 

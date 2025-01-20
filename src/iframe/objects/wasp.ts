@@ -7,6 +7,7 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
   #lifespan: number = 0
   #isChasing: boolean = false
   #target: Phaser.Math.Vector2 = new Phaser.Math.Vector2()
+  #dead: boolean = false
 
   constructor(scene: Shmup, x: number, y: number, speed: number) {
     super(scene, x, y, '')
@@ -21,6 +22,7 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
   start(): this {
     const radius = this.width / 4
     this.setCircle(radius, this.width / 4, this.height / 4)
+    this.body.enable = true
 
     this.scene.tweens.add({
       targets: this,
@@ -36,6 +38,15 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
       }
     })
 
+    this.#dead = false
+    this.setInteractive()
+    this.on(Phaser.Input.Events.POINTER_DOWN, () => {
+      this.scene.sound.play('doot')
+      this.play('wasp--Squished')
+      this.#dead = true
+      this.stop()
+    })
+
     return this
   }
 
@@ -47,6 +58,7 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
   protected override preUpdate(time: number, delta: number): void {
     super.preUpdate(time, delta)
 
+    if (this.#dead) return
     if (this.#isChasing) {
       this.#lifespan -= delta
 
@@ -80,6 +92,7 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
     this.#isChasing = false
 
     this.body.stop()
+    this.body.enable = false
 
     return this
   }

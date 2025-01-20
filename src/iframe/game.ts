@@ -1,3 +1,4 @@
+import {devMode} from '../shared/dev-mode.ts'
 import type {Player} from '../shared/save.ts'
 import {minCanvasWH} from '../shared/theme.ts'
 import type {
@@ -16,12 +17,8 @@ import {Shmup} from './scenes/shmup.ts'
 import {Title} from './scenes/title.ts'
 
 export class Game {
-  debug: boolean
-  // to-do: compile-time constant to enable dead code removal.
-  // to-do: spawn AI?
-  /** development mode; no devvit. */
-  readonly dev: boolean = location.port === '1234'
-  readonly devPeerChan: BroadcastChannel | undefined = this.dev
+  debug: boolean = devMode
+  readonly devPeerChan: BroadcastChannel | undefined = devMode
     ? new BroadcastChannel('dev')
     : undefined
   /** undefined until Init message. */
@@ -32,7 +29,6 @@ export class Game {
   #init!: () => void
 
   constructor() {
-    this.debug = this.dev
     this.init = new Promise(resolve => (this.#init = resolve))
     const config: Phaser.Types.Core.GameConfig = {
       backgroundColor: '#f00000', // to-do: fix.
@@ -65,7 +61,7 @@ export class Game {
     addEventListener('message', ev => this.#onMsg(ev))
     postWebViewMessage(this, {type: 'Listening'})
 
-    if (this.dev) {
+    if (devMode) {
       this.devPeerChan?.addEventListener('message', ev => {
         const msg: PeerMessage = ev.data
         if (!(msg.peer.sid in this.peers))
@@ -154,9 +150,7 @@ export class Game {
     _canvasSize: Phaser.Structs.Size,
     _displaySize: Phaser.Structs.Size
   ): void {
-    for (const scene of this.phaser.scene.getScenes()) {
-      centerCam(scene)
-    }
+    for (const scene of this.phaser.scene.getScenes()) centerCam(scene)
   }
 }
 

@@ -2,8 +2,8 @@
   "frames": {
     "0": {
       "frame": {
-        "x": 67,
-        "y": 179,
+        "x": 133,
+        "y": 184,
         "w": 56,
         "h": 44
       },
@@ -24,7 +24,7 @@
     "1": {
       "frame": {
         "x": 1,
-        "y": 129,
+        "y": 183,
         "w": 65,
         "h": 51
       },
@@ -44,8 +44,8 @@
     },
     "2": {
       "frame": {
-        "x": 1,
-        "y": 181,
+        "x": 67,
+        "y": 184,
         "w": 65,
         "h": 44
       },
@@ -65,7 +65,7 @@
     },
     "3": {
       "frame": {
-        "x": 67,
+        "x": 65,
         "y": 129,
         "w": 57,
         "h": 49
@@ -293,6 +293,27 @@
         "h": 64
       },
       "duration": 30
+    },
+    "14": {
+      "frame": {
+        "x": 1,
+        "y": 129,
+        "w": 63,
+        "h": 53
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 3,
+        "y": 6,
+        "w": 61,
+        "h": 51
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 64
+      },
+      "duration": 300
     }
   },
   "meta": {
@@ -302,7 +323,7 @@
     "format": "RGBA8888",
     "size": {
       "w": 258,
-      "h": 226
+      "h": 235
     },
     "scale": "1",
     "frameTags": [
@@ -317,6 +338,13 @@
         "name": "wasp--Idle",
         "from": 4,
         "to": 13,
+        "direction": "forward",
+        "color": "#000000ff"
+      },
+      {
+        "name": "wasp--Squished",
+        "from": 14,
+        "to": 14,
         "direction": "forward",
         "color": "#000000ff"
       }

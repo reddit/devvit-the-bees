@@ -46,7 +46,7 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
     }
 
     if (this.#isAlive) {
-      this.#target.x = this.scene.input.activePointer.x
+      this.#target.x = this.scene.input.activePointer.x - (this.width * 5) / 8
       this.#target.y = this.scene.input.activePointer.y
 
       if (
