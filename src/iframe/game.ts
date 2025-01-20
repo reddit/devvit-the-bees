@@ -32,7 +32,6 @@ export class Game {
     this.init = new Promise(resolve => (this.#init = resolve))
     const config: Phaser.Types.Core.GameConfig = {
       backgroundColor: '#f00000', // to-do: fix.
-      // height: '100%',
       width: minCanvasWH.w,
       height: minCanvasWH.h,
       pixelArt: true,
@@ -40,11 +39,9 @@ export class Game {
       scale: {
         autoCenter: Phaser.Scale.CENTER_BOTH,
         mode: Phaser.Scale.EXPAND
-        // zoom: Phaser.Scale.MAX_ZOOM
       },
       scene: [Preload, new Loading(this), Title, new Shmup(this), GameOver],
       type: Phaser.AUTO
-      // width: '100%'
     }
     this.phaser = new Phaser.Game(config)
     this.phaser.scale.on('resize', () => this.#onResize())
@@ -144,6 +141,7 @@ export class Game {
 }
 
 export function centerCam(scene: Phaser.Scene): void {
-  scene.cameras.main.x = (scene.scale.width - minCanvasWH.w) / 2
-  scene.cameras.main.y = (scene.scale.height - minCanvasWH.h) / 2
+  const cam = scene.cameras.main
+  cam.scrollX = -(scene.scale.width - minCanvasWH.w) / 2
+  cam.scrollY = -(scene.scale.height - minCanvasWH.h) / 2
 }
