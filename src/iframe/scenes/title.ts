@@ -1,4 +1,5 @@
 import {minCanvasWH} from '../../shared/theme.ts'
+import {centerCam} from '../game.ts'
 import {Shmup} from './shmup.ts'
 
 export class Title extends Phaser.Scene {
@@ -7,6 +8,7 @@ export class Title extends Phaser.Scene {
   }
 
   create(): void {
+    centerCam(this)
     this.add.image(minCanvasWH.w / 2, minCanvasWH.h / 2, 'background')
     this.add.text(0, 0, 'title')
 

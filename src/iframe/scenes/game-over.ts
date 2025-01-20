@@ -1,3 +1,4 @@
+import {centerCam} from '../game.ts'
 import {Title} from './title.ts'
 
 export class GameOver extends Phaser.Scene {
@@ -6,6 +7,7 @@ export class GameOver extends Phaser.Scene {
   }
 
   create(): void {
+    centerCam(this)
     this.add.text(0, 0, 'game over')
     this.input.on('pointerdown', () => this.scene.start(Title.name))
   }

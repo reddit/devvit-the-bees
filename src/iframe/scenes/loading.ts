@@ -4,7 +4,7 @@
 import atlas from '../../../webroot/assets/images/atlas.json'
 
 import {minCanvasWH} from '../../shared/theme.ts'
-import type {Game} from '../game.ts'
+import {type Game, centerCam} from '../game.ts'
 import {Title} from './title.ts'
 
 export class Loading extends Phaser.Scene {
@@ -16,6 +16,7 @@ export class Loading extends Phaser.Scene {
   }
 
   create(): void {
+    centerCam(this)
     // hack: Phaser's importer doesn't read animation loop counts.
     for (const anim of this.anims.createFromAseprite('atlas')) {
       const tag = atlas.meta.frameTags.find(tag => tag.name === anim.key)

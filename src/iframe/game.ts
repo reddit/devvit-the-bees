@@ -63,17 +63,16 @@ export class Game {
 
   start(): void {
     addEventListener('message', ev => this.#onMsg(ev))
-
-    this.devPeerChan?.addEventListener('message', ev => {
-      const msg: PeerMessage = ev.data
-      if (!(msg.peer.sid in this.peers))
-        this.#onDevMsg({type: 'PeerJoin', peer: msg.peer})
-      this.#onDevMsg(ev.data)
-    })
-
     postWebViewMessage(this, {type: 'Listening'})
 
     if (this.dev) {
+      this.devPeerChan?.addEventListener('message', ev => {
+        const msg: PeerMessage = ev.data
+        if (!(msg.peer.sid in this.peers))
+          this.#onDevMsg({type: 'PeerJoin', peer: msg.peer})
+        this.#onDevMsg(ev.data)
+      })
+
       const seed = Date.now()
       console.log(`seed=${seed}`)
 
@@ -119,7 +118,7 @@ export class Game {
     const msg = ev.data.data.message
 
     if (this.debug || (msg.type === 'Init' && msg.debug))
-      console.log(`iframe msg=${JSON.stringify(msg)}`)
+      console.log(`Game msg=${JSON.stringify(msg)}`)
 
     switch (msg.type) {
       case 'Init':
@@ -151,31 +150,17 @@ export class Game {
   }
 
   #onResize(
-    gameSize: Phaser.Structs.Size,
-    canvasSize: Phaser.Structs.Size,
-    displaySize: Phaser.Structs.Size
+    _gameSize: Phaser.Structs.Size,
+    _canvasSize: Phaser.Structs.Size,
+    _displaySize: Phaser.Structs.Size
   ): void {
-    console.log(gameSize, canvasSize, displaySize)
-    // const {width, height} = canvasSize
-    // game.parent.setSize(width, height);
-    // game.sizer.setSize(width, height);
-
     for (const scene of this.phaser.scene.getScenes()) {
-      // scene.cameras.resize(innerWidth, innerHeight)
-      for (const camera of scene.cameras.cameras) {
-        console.log(camera)
-        // If you want to preserve the letterboxed area only,
-        // you might compute an "effective" size:
-        //   const scaleX = width / this.baseWidth;
-        //   const scaleY = height / this.baseHeight;
-        //   const scale = Math.min(scaleX, scaleY);
-        //   const effectiveWidth = this.baseWidth * scale;
-        //   const effectiveHeight = this.baseHeight * scale;
-        //   camera.setBounds(0, 0, effectiveWidth, effectiveHeight);
-        //
-        // Or if you want to fill the entire window as playable area:
-        // camera.setBounds(0, 0, width, height)
-      }
+      centerCam(scene)
     }
   }
+}
+
+export function centerCam(scene: Phaser.Scene): void {
+  scene.cameras.main.x = (scene.scale.gameSize.width - minCanvasWH.w) / 2
+  scene.cameras.main.y = (scene.scale.gameSize.height - minCanvasWH.h) / 2
 }

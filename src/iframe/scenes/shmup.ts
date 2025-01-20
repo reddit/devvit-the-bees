@@ -1,5 +1,5 @@
 import {minCanvasWH} from '../../shared/theme.js'
-import type {Game} from '../game.js'
+import {type Game, centerCam} from '../game.js'
 import {Bee} from '../objects/bee.js'
 import {WaspGroup} from '../objects/wasp-group.js'
 import type {Wasp} from '../objects/wasp.js'
@@ -16,6 +16,7 @@ export class Shmup extends Phaser.Scene {
   }
 
   create(): void {
+    centerCam(this)
     this.add.image(minCanvasWH.w / 2, minCanvasWH.h / 2, 'background')
 
     this.#wasps = new WaspGroup(this.physics.world, this)

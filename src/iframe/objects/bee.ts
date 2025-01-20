@@ -21,7 +21,6 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
 
     this.#target = new Phaser.Math.Vector2()
 
-    // to-do: the importer is not setting the repeat property. how to fix?
     this.play('bee--Idle')
   }
 

@@ -1,3 +1,4 @@
+import {centerCam} from '../game.ts'
 import {Loading} from './loading.ts'
 
 /**
@@ -10,6 +11,7 @@ export class Preload extends Phaser.Scene {
   }
 
   create(): void {
+    centerCam(this)
     this.scene.start(Loading.name)
   }
 
