@@ -19,7 +19,8 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
   }
 
   start(): this {
-    this.setCircle(14, 6, 2)
+    const radius = this.width / 4
+    this.setCircle(radius, this.width / 4, this.height / 4)
 
     this.scene.tweens.add({
       targets: this,
@@ -65,7 +66,7 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
           }
         })
       } else {
-        this.#target = this.scene.getPlayerXY()
+        this.#target = this.scene.getBeeXY()
 
         this.rotation =
           this.scene.physics.moveToObject(this, this.#target, this.#speed) +

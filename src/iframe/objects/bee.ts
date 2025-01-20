@@ -16,9 +16,6 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this)
     scene.physics.add.existing(this)
 
-    this.setCircle(14, 3, 6)
-    this.setCollideWorldBounds(true)
-
     this.#target = new Phaser.Math.Vector2()
 
     this.play('bee--Idle')
@@ -78,5 +75,9 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
 
   start(): void {
     this.#isAlive = true
+
+    const radius = this.width / 4
+    this.setCircle(radius, this.width / 4, this.height / 4)
+    this.setCollideWorldBounds(true)
   }
 }

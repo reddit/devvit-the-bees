@@ -29,6 +29,10 @@ export class Shmup extends Phaser.Scene {
     )
   }
 
+  getBeeXY(): Phaser.Math.Vector2 {
+    return new Phaser.Math.Vector2(this.bee.x, this.bee.y)
+  }
+
   init(): void {
     centerCam(this)
   }
@@ -45,9 +49,5 @@ export class Shmup extends Phaser.Scene {
         this.scene.start(GameOver.name)
       })
     }
-  }
-
-  getPlayerXY(): Phaser.Math.Vector2 {
-    return new Phaser.Math.Vector2(this.bee.x, this.bee.y)
   }
 }
