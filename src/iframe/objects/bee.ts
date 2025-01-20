@@ -34,7 +34,11 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
   protected override preUpdate(time: number, delta: number): void {
     super.preUpdate(time, delta)
 
-    this.#target.x = this.scene.input.activePointer.x - (this.width * 5) / 8
+    const pointer = this.scene.input.activePointer
+    const xy = pointer.positionToCamera(
+      this.scene.cameras.main
+    ) as Phaser.Math.Vector2
+    this.#target.x = xy.x
     this.#target.y = this.y
 
     if (
@@ -43,8 +47,9 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
         this.y,
         this.#target.x,
         this.#target.y
-      ) > 1 &&
-      this.#isAlive
+      ) > 10 &&
+      this.#isAlive &&
+      pointer.isDown
     ) {
       this.scene.physics.moveToObject(this, this.#target, speed)
       postWebViewMessage(this.#game, {

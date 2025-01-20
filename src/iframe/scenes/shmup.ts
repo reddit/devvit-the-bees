@@ -30,6 +30,18 @@ export class Shmup extends Phaser.Scene {
     this.physics.add.overlap(this.bee, this.#wasps, (bee, wasp) =>
       this.#onBeeHitWasp(bee as Bee, wasp as Wasp)
     )
+
+    const bounds = {x: -1600, y: -900, w: 3200, h: 2400}
+    this.physics.world.setBounds(bounds.x, bounds.y, bounds.w, bounds.h)
+    cam.setBounds(bounds.x, bounds.y, bounds.w, bounds.h)
+    cam.startFollow(
+      this.bee,
+      false,
+      0.2,
+      0.2,
+      0,
+      cam.height / 2 - this.bee.height / 2
+    )
   }
 
   getBeeXY(): Phaser.Math.Vector2 {
