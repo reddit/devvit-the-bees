@@ -45,7 +45,7 @@ for (const span of atlas.meta.frameTags) {
     atlas.frames[frameNum] = frame
     frameNum++
   }
-  span.from += frameNum - (span.to - span.from + 1)
+  span.from = frameNum - (span.to - span.from + 1)
   span.to = frameNum - 1
 }
 fs.writeFileSync(atlasJSONFilename, JSON.stringify(atlas, undefined, 2))
