@@ -36,7 +36,7 @@ export type WebViewMessage =
   | PeerMessage
 
 /** a realtime message from another instance. */
-export type PeerMessage = {type: 'Peer'; taps: XY[]} & RealtimeMessage
+export type PeerMessage = {type: 'Peer'; xy: XY; taps: XY[]} & RealtimeMessage
 
 /** base realtime message sent or received. */
 export type RealtimeMessage = {

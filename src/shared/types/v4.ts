@@ -1,7 +1,7 @@
 import {devMode} from '../dev-mode.ts'
 
 /** UUID v4. */
-export type V4 = ReturnType<typeof crypto.randomUUID>
+export type V4 = ReturnType<Crypto['randomUUID']>
 
 export const noV4: V4 = '00000000-0000-0000-0000-000000000000'
 

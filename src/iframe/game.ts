@@ -1,6 +1,7 @@
 import {devMode} from '../shared/dev-mode.ts'
 import type {Player} from '../shared/save.ts'
 import {minCanvasWH} from '../shared/theme.ts'
+import type {XY} from '../shared/types/2d.ts'
 import type {
   DevvitMessage,
   DevvitSystemMessage,
@@ -23,7 +24,7 @@ export class Game {
     : undefined
   /** undefined until Init message. */
   p1!: Player
-  readonly peers: {[sid: SID]: Player} = {}
+  readonly peers: {[sid: SID]: {player: Player; xy: XY}} = {}
   readonly phaser: Phaser.Game
   readonly init: Promise<void>
   #init!: () => void
@@ -36,10 +37,7 @@ export class Game {
       height: minCanvasWH.h,
       pixelArt: true,
       physics: {default: 'arcade', arcade: {debug: true}},
-      scale: {
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-        mode: Phaser.Scale.EXPAND
-      },
+      scale: {autoCenter: Phaser.Scale.CENTER_BOTH, mode: Phaser.Scale.EXPAND},
       scene: [Preload, new Loading(this), Title, new Shmup(this), GameOver],
       type: Phaser.AUTO
     }

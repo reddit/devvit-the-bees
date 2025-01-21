@@ -10,7 +10,6 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
   #speed: number
   #lifespan: number = 0
   #path!: Phaser.Curves.Path
-  #target: Phaser.Math.Vector2 = new Phaser.Math.Vector2()
   #dead: boolean = false
 
   constructor(scene: Shmup, x: number, y: number, speed: number) {

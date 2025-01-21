@@ -1,3 +1,4 @@
+import {fontFamily, fontMSize} from '../../shared/theme.ts'
 import {realtimeVersion} from '../../shared/types/message.ts'
 import type {Game} from '../game.ts'
 import {postWebViewMessage} from '../mail.ts'
@@ -9,8 +10,15 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
   #game: Game
   #isAlive: boolean = false
   #target: Phaser.Math.Vector2
+  #text: Phaser.GameObjects.Text
 
-  constructor(scene: Phaser.Scene, x: number, y: number, game: Game) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    game: Game,
+    username: string
+  ) {
     super(scene, x, y, '')
     this.#game = game
 
@@ -18,6 +26,10 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this)
 
     this.#target = new Phaser.Math.Vector2(x, y)
+    this.#text = this.scene.add.text(this.x, this.y, username, {
+      fontFamily: fontFamily,
+      fontSize: fontMSize
+    })
 
     this.play('bee--Idle')
   }
@@ -57,10 +69,14 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
       postWebViewMessage(this.#game, {
         type: 'Peer',
         peer: this.#game.p1,
+        xy: {x: this.x, y: this.y},
         taps: [],
         version: realtimeVersion
       })
     } else if (this.#isAlive && this.body.speed) this.body.reset(this.x, this.y)
+
+    this.#text.x = this.x - this.#text.width / 2
+    this.#text.y = this.y + this.height / 2 - 4
   }
 
   start(): void {

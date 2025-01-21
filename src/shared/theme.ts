@@ -7,7 +7,7 @@ export const spacePx: number = 8
 export const minCanvasWH: Readonly<WH> = {w: 224, h: 320}
 
 export const fontFamily: string = 'Times New Roman' // to-do: fix.
-export const fontXLSize: number = 72 // to-do: fix.
+export const fontMSize: number = 12
 
 export const playButtonWidth: number = 160 // to-do: fix.
 
