@@ -4,15 +4,16 @@
 import atlas from '../../../webroot/assets/images/atlas.json'
 
 import {minCanvasWH} from '../../shared/theme.ts'
-import {type Game, centerCam} from '../game.ts'
+import {centerCam} from '../game.ts'
+import type {Store} from '../store.ts'
 import {Title} from './title.ts'
 
 export class Loading extends Phaser.Scene {
-  #game: Game
+  #store: Store
 
-  constructor(game: Game) {
+  constructor(store: Store) {
     super(new.target.name)
-    this.#game = game
+    this.#store = store
   }
 
   create(): void {
@@ -23,7 +24,7 @@ export class Loading extends Phaser.Scene {
       anim.repeat = 'repeat' in tag ? (tag.repeat as number) : -1
     }
 
-    void this.#game.init.then(() => this.scene.start(Title.name))
+    void this.#store.init.then(() => this.scene.start(Title.name))
   }
 
   init(): void {

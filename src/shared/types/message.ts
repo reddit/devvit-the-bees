@@ -1,5 +1,6 @@
 import type {Player, PostSeed} from '../save.ts'
 import type {XY} from './2d.ts'
+import type {UTCMillis} from './time.ts'
 
 /**
  * a message from blocks to the iframe. Init always arrived first, usually
@@ -18,9 +19,9 @@ export type DevvitMessage =
     }
   | {type: 'Connected'}
   | {type: 'Disconnected'}
+  | PeerMessage
   | {peer: Player; type: 'PeerJoin'}
   | {peer: Player; type: 'PeerLeave'}
-  | PeerMessage
 
 /** the devvit API wraps all messages from blocks to the iframe. */
 export type DevvitSystemMessage = {
@@ -36,7 +37,18 @@ export type WebViewMessage =
   | PeerMessage
 
 /** a realtime message from another instance. */
-export type PeerMessage = {type: 'Peer'; xy: XY; taps: XY[]} & RealtimeMessage
+export type PeerMessage = {type: 'Peer'; sync: PlayerSync} & RealtimeMessage
+
+// spawning, including waves, are deterministic. each player only spawns bullets for themselves
+// but local bullets spawned from another player can damage current player. that's the resolution.
+export type PlayerSync = {
+  dir: XY
+  // bullets: {[ent: V4]: XY}, // dir
+  // hits: {[ent: V4]: number}
+  // hp: number
+  time: UTCMillis
+  xy: XY
+}
 
 /** base realtime message sent or received. */
 export type RealtimeMessage = {

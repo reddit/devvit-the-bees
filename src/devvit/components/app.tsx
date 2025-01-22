@@ -27,8 +27,8 @@ export function App(ctx: Devvit.Context): JSX.Element {
 
   const webView = useWebView2<WebViewMessage, DevvitMessage>({
     onMessage(msg) {
-      if (session.debug)
-        console.log(`${profile.username} App msg=${JSON.stringify(msg)}`)
+      // if (session.debug)
+      //   console.log(`${profile.username} App msg=${JSON.stringify(msg)}`)
 
       switch (msg.type) {
         case 'Listening':
@@ -60,8 +60,8 @@ export function App(ctx: Devvit.Context): JSX.Element {
     onMessage: msg => webView.postMessage(msg),
     p1,
     version: realtimeVersion,
-    onPeerJoin: peer => webView.postMessage({peer, type: 'PeerJoin'}),
-    onPeerLeave: peer => webView.postMessage({peer, type: 'PeerLeave'}),
+    onPeerJoin: peer => webView.postMessage({peer: peer, type: 'PeerJoin'}),
+    onPeerLeave: peer => webView.postMessage({peer: peer, type: 'PeerLeave'}),
     onSubscribed: () => webView.postMessage({type: 'Connected'}),
     onUnsubscribed: () => webView.postMessage({type: 'Disconnected'})
   })

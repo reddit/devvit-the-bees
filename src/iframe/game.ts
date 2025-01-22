@@ -1,14 +1,20 @@
 import {devMode} from '../shared/dev-mode.ts'
-import type {Player} from '../shared/save.ts'
-import {minCanvasWH} from '../shared/theme.ts'
+import {
+  minCanvasWH,
+  peerDefaultDisconnectMillis,
+  peerDisconnectIntervalMillis,
+  peerMaxSyncInterval
+} from '../shared/theme.ts'
 import type {XY} from '../shared/types/2d.ts'
-import type {
-  DevvitMessage,
-  DevvitSystemMessage,
-  PeerMessage
+import {
+  type DevvitMessage,
+  type DevvitSystemMessage,
+  type PeerMessage,
+  realtimeVersion
 } from '../shared/types/message.ts'
 import type {Seed} from '../shared/types/seed.ts'
 import {SID} from '../shared/types/sid.ts'
+import {type UTCMillis, utcMillisNow} from '../shared/types/time.ts'
 import {devProfiles} from './dev/dev-profiles.ts'
 import {postWebViewMessage} from './mail.ts'
 import {GameOver} from './scenes/game-over.ts'
@@ -16,21 +22,17 @@ import {Loading} from './scenes/loading.ts'
 import {Preload} from './scenes/preload.ts'
 import {Shmup} from './scenes/shmup.ts'
 import {Title} from './scenes/title.ts'
+import {Store} from './store.ts'
 
 export class Game {
-  debug: boolean = devMode
-  readonly devPeerChan: BroadcastChannel | undefined = devMode
-    ? new BroadcastChannel('dev')
-    : undefined
-  /** undefined until Init message. */
-  p1!: Player
-  readonly peers: {[sid: SID]: {player: Player; xy: XY}} = {}
-  readonly phaser: Phaser.Game
-  readonly init: Promise<void>
+  readonly store: Store
+
+  #devPeerDisconnectInterval?: number
   #init!: () => void
 
   constructor() {
-    this.init = new Promise(resolve => (this.#init = resolve))
+    this.store = new Store(new Promise(resolve => (this.#init = resolve)))
+    this.store.subscribe.onP1XY.add(xy => this.#onP1XY(xy))
     const config: Phaser.Types.Core.GameConfig = {
       backgroundColor: '#f00000', // to-do: fix.
       width: minCanvasWH.w,
@@ -38,24 +40,40 @@ export class Game {
       pixelArt: true,
       physics: {default: 'arcade', arcade: {debug: true}},
       scale: {autoCenter: Phaser.Scale.CENTER_BOTH, mode: Phaser.Scale.EXPAND},
-      scene: [Preload, new Loading(this), Title, new Shmup(this), GameOver],
+      scene: [
+        Preload,
+        new Loading(this.store),
+        Title,
+        new Shmup(this.store),
+        GameOver
+      ],
       type: Phaser.AUTO
     }
-    this.phaser = new Phaser.Game(config)
-    this.phaser.scale.on('resize', () => this.#onResize())
+    this.store.phaser = new Phaser.Game(config)
+    this.store.phaser.scale.on('resize', () => this.#onResize())
   }
 
   start(): void {
     addEventListener('message', ev => this.#onMsg(ev))
-    postWebViewMessage(this, {type: 'Listening'})
+    postWebViewMessage(this.store, {type: 'Listening'})
 
     if (devMode) {
-      this.devPeerChan?.addEventListener('message', ev => {
+      this.store.devPeerChan?.addEventListener('message', ev => {
         const msg: PeerMessage = ev.data
-        if (!(msg.peer.sid in this.peers))
+        if (
+          msg.peer.sid !== this.store.p1?.player.sid &&
+          !(msg.peer.sid in this.store.peers)
+        )
           this.#onDevMsg({type: 'PeerJoin', peer: msg.peer})
         this.#onDevMsg(ev.data)
       })
+      this.#devPeerDisconnectInterval = setInterval(() => {
+        const now = utcMillisNow()
+        for (const peer of Object.values(this.store.peers)) {
+          if (now - peer.sync.time > peerDefaultDisconnectMillis)
+            this.#onDevMsg({type: 'PeerLeave', peer: peer.player})
+        }
+      }, peerDisconnectIntervalMillis)
 
       const seed = Date.now()
       console.log(`seed=${seed}`)
@@ -95,46 +113,91 @@ export class Game {
     )
   }
 
+  // to-do: should this be part of data store? I am doing so much data hacking here but it's all business logic.
   async #onMsg(ev: MessageEvent<DevvitSystemMessage>): Promise<void> {
     // hack: filter unknown messages.
     if (ev.data.type !== 'devvit-message') return
 
     const msg = ev.data.data.message
 
-    if (this.debug || (msg.type === 'Init' && msg.debug))
-      console.log(`Game msg=${JSON.stringify(msg)}`)
+    // if (this.store.debug || (msg.type === 'Init' && msg.debug))
+    //   console.log(`Game msg=${JSON.stringify(msg)}`)
 
     switch (msg.type) {
       case 'Init':
-        this.debug = msg.debug
-        this.p1 = msg.p1
+        this.store.debug = msg.debug
+        this.store.p1 = {
+          player: msg.p1,
+          sync: {dir: {x: 0, y: 0}, time: 0 as UTCMillis, xy: {x: 0, y: 0}},
+          xy: {x: 0, y: 0}
+        } // to-do: XY
         Phaser.Math.RND.sow([`${msg.seed.seed}`])
-        if (this.debug) console.log(`${this.p1.profile.username} init`)
+        if (this.store.debug)
+          console.log(`${this.store.p1.player.profile.username} init`)
         this.#init()
         break
       case 'Connected':
-        if (this.debug) console.log(`${this.p1.profile.username} connected`)
+        if (this.store.debug)
+          console.log(`${this.store.p1.player.profile.username} connected`)
+        this.#postP1PeerMessage()
         break
       case 'Disconnected':
-        if (this.debug) console.log(`${this.p1.profile.username} disconnected`)
+        if (this.store.debug)
+          console.log(`${this.store.p1.player.profile.username} disconnected`)
         break
       case 'Peer':
+        this.store.peers[msg.peer.sid]!.sync = msg.sync
+        this.store.onPeerMessage(msg)
         break
       case 'PeerJoin':
-        if (this.debug) console.log(`${msg.peer.profile.username} joined`)
-        this.peers[msg.peer.sid] = msg.peer
+        if (this.store.debug) console.log(`${msg.peer.profile.username} joined`)
+        this.store.onPeerJoin({
+          player: msg.peer,
+          sync: {
+            dir: {x: 0, y: 0},
+            time: utcMillisNow(),
+            xy: {x: -9999, y: -9999}
+          }, // to-do: XY, dir.
+          xy: {x: -9999, y: -9999}
+        })
         break
-      case 'PeerLeave':
-        if (this.debug) console.log(`${msg.peer.profile.username} left`)
-        delete this.peers[msg.peer.sid]
+      case 'PeerLeave': {
+        if (this.store.debug) console.log(`${msg.peer.profile.username} left`)
+        const state = this.store.peers[msg.peer.sid]
+        if (state) this.store.onPeerLeave(state)
         break
+      }
       default:
         msg satisfies never
     }
   }
 
+  #onP1XY(xy: Readonly<XY>): void {
+    const significant =
+      Phaser.Math.Distance.Between(
+        this.store.p1.sync.xy.x,
+        this.store.p1.sync.xy.y,
+        xy.x,
+        xy.y
+      ) > 5 || utcMillisNow() - this.store.p1.sync.time > peerMaxSyncInterval
+    if (!significant) return
+    this.#postP1PeerMessage()
+  }
+
   #onResize(): void {
-    for (const scene of this.phaser.scene.getScenes()) centerCam(scene)
+    for (const scene of this.store.phaser.scene.getScenes()) centerCam(scene)
+  }
+
+  #postP1PeerMessage(): void {
+    // to-do: dir.
+    this.store.p1.sync.time = utcMillisNow()
+    this.store.p1.sync.xy = this.store.p1.xy
+    postWebViewMessage(this.store, {
+      type: 'Peer',
+      peer: this.store.p1.player,
+      sync: this.store.p1.sync,
+      version: realtimeVersion
+    })
   }
 }
 

@@ -1,10 +1,10 @@
 import type {WebViewMessage} from '../shared/types/message.ts'
-import type {Game} from './game.ts'
+import type {Store} from './store.ts'
 
 export function postWebViewMessage(
-  game: Readonly<Game>,
+  store: Readonly<Store>,
   msg: Readonly<WebViewMessage>
 ): void {
-  if (msg.type === 'Peer') game.devPeerChan?.postMessage(msg)
+  if (msg.type === 'Peer') store.devPeerChan?.postMessage(msg)
   parent.postMessage(msg, document.referrer || '*')
 }

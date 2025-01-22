@@ -6,6 +6,10 @@ import {
   useInterval
 } from '@devvit/public-api'
 import type {Player} from '../../shared/save.ts'
+import {
+  peerDefaultDisconnectMillis,
+  peerDisconnectIntervalMillis
+} from '../../shared/theme.ts'
 import type {RealtimeMessage} from '../../shared/types/message.ts'
 import type {SID} from '../../shared/types/sid.ts'
 import type {T3} from '../../shared/types/tid.ts'
@@ -44,22 +48,20 @@ export type UseChannel2Result<T extends JSONObject> = UseChannelResult<T> & {
   peers: Readonly<PeerMap>
 }
 
-export type PeerMap = {
-  [sid: SID]: {peered: UTCMillis; player: Readonly<Player>}
-}
-
-const defaultDisconnectMillis: number = 5_000
-const disconnectIntervalMillis: number = 1_000
+type PeerMap = {[sid: SID]: {time: UTCMillis; player: Readonly<Player>}}
 
 export function useChannel2<T extends JSONObject>(
   opts: Readonly<UseChannel2Opts<T & RealtimeMessage>>
 ): UseChannel2Result<T> {
+  // to-do: this is useful to report the number of current users but users don't
+  // currently message from the title screen. add a special message?
   const [peers, setPeers] = useState2<PeerMap>({})
   const disconnectInterval = useInterval(() => {
     const now = utcMillisNow()
-    const disconnectMillis = opts.disconnectMillis ?? defaultDisconnectMillis
+    const disconnectMillis =
+      opts.disconnectMillis ?? peerDefaultDisconnectMillis
     for (const peer of Object.values(peers)) {
-      if (now - peer.peered > disconnectMillis) {
+      if (now - peer.time > disconnectMillis) {
         setPeers(peers => {
           delete peers[peer.player.sid]
           return peers
@@ -68,20 +70,19 @@ export function useChannel2<T extends JSONObject>(
       }
     }
     if (!Object.keys(peers).length) disconnectInterval.stop()
-  }, disconnectIntervalMillis)
+  }, peerDisconnectIntervalMillis)
 
   const chan = useChannel<T & RealtimeMessage>({
     name: opts.chan,
     onMessage(msg) {
+      if (msg.peer.sid === opts.p1.sid) return // omit messages from self.
       if (!(msg.peer.sid in peers)) {
         setPeers(peers => {
-          peers[msg.peer.sid] = {player: msg.peer, peered: utcMillisNow()}
+          peers[msg.peer.sid] = {player: msg.peer, time: utcMillisNow()}
           return peers
         })
         opts.onPeerJoin?.(msg.peer)
       }
-      // omit messages received from self (but update peer map first).
-      if (msg.peer.sid === opts.p1.sid) return
       if (msg.version === opts.version) opts.onMessage(msg)
       else if (msg.version > opts.version)
         console.info(`ignored v${msg.version} message`)
