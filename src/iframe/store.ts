@@ -1,16 +1,16 @@
 import {devMode} from '../shared/dev-mode.ts'
 import type {Player} from '../shared/save.ts'
 import type {XY} from '../shared/types/2d.ts'
-import type {PeerMessage, PlayerSync} from '../shared/types/message.ts'
+import type {PeerUpdatedMessage, PlayerSync} from '../shared/types/message.ts'
 import type {SID} from '../shared/types/sid.ts'
 
 export type PlayerState = {player: Player; sync: PlayerSync; xy: XY}
 
 type SubscribeMap = {
-  onP1XY: Set<(xy: Readonly<XY>) => void>
-  onPeerJoin: Set<(state: PlayerState) => void>
-  onPeerLeave: Set<(state: PlayerState) => void>
-  onPeerMessage: Set<(msg: PeerMessage) => void>
+  p1XY: Set<(xy: Readonly<XY>) => void>
+  peerConnected: Set<(state: PlayerState) => void>
+  peerDisconnected: Set<(state: PlayerState) => void>
+  peerUpdated: Set<(msg: PeerUpdatedMessage) => void>
 }
 
 export class Store {
@@ -22,11 +22,11 @@ export class Store {
   /** undefined until Init message. */
   p1!: PlayerState
   phaser!: Phaser.Game
-  readonly subscribe: Readonly<SubscribeMap> = {
-    onP1XY: new Set(),
-    onPeerJoin: new Set(),
-    onPeerLeave: new Set(),
-    onPeerMessage: new Set()
+  readonly on: Readonly<SubscribeMap> = {
+    p1XY: new Set(),
+    peerConnected: new Set(),
+    peerDisconnected: new Set(),
+    peerUpdated: new Set()
   }
   readonly #peers: {[sid: SID]: PlayerState} = {}
 
@@ -34,20 +34,20 @@ export class Store {
     this.init = init
   }
 
-  onPeerJoin(state: PlayerState): void {
+  onPeerConnected(state: PlayerState): void {
     const joined = state.player.sid in this.#peers
     this.#peers[state.player.sid] = state
-    if (!joined) for (const cb of this.subscribe.onPeerJoin) cb(state)
+    if (!joined) for (const cb of this.on.peerConnected) cb(state)
   }
 
-  onPeerLeave(state: PlayerState): void {
+  onPeerDisconnected(state: PlayerState): void {
     const joined = state.player.sid in this.#peers
     delete this.#peers[state.player.sid]
-    if (joined) for (const cb of this.subscribe.onPeerLeave) cb(state)
+    if (joined) for (const cb of this.on.peerDisconnected) cb(state)
   }
 
-  onPeerMessage(msg: PeerMessage): void {
-    for (const cb of this.subscribe.onPeerMessage) cb(msg)
+  onPeerUpdated(msg: PeerUpdatedMessage): void {
+    for (const cb of this.on.peerUpdated) cb(msg)
   }
 
   get peers(): {readonly [sid: SID]: PlayerState} {
@@ -57,6 +57,6 @@ export class Store {
   setP1XY(xy: Readonly<XY>): void {
     this.p1.xy.x = xy.x
     this.p1.xy.y = xy.y
-    for (const cb of this.subscribe.onP1XY) cb(xy)
+    for (const cb of this.on.p1XY) cb(xy)
   }
 }

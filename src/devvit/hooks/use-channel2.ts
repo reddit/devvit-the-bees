@@ -27,6 +27,14 @@ export type UseChannel2Opts<T extends RealtimeMessage & JSONObject> = {
   chan: T3 | string
   /** Duration of radio silence before a peer is considered offline. */
   disconnectMillis?: number
+  /** Optional hook to be informed when the channel has connected. */
+  onConnected?: (() => void | Promise<void>) | undefined
+  /** Optional hook to be informed when the channel has disconnected. */
+  onDisconnected?: (() => void | Promise<void>) | undefined
+  /** Called every time a message is received on this channel. */
+  onMessage(msg: T): void
+  onPeerConnected?: ((peer: Readonly<Player>) => void) | undefined
+  onPeerDisconnected?: ((peer: Readonly<Player>) => void) | undefined
   p1: Player
   /**
    * The message schema version. Eg, 1. Only messages from clients sending the
@@ -34,14 +42,6 @@ export type UseChannel2Opts<T extends RealtimeMessage & JSONObject> = {
    * breaking change is made to the message format.
    */
   version: number
-  /** Called every time a message is received on this channel. */
-  onMessage(msg: T): void
-  onPeerJoin?: ((peer: Readonly<Player>) => void) | undefined
-  onPeerLeave?: ((peer: Readonly<Player>) => void) | undefined
-  /** Optional hook to be informed when the channel has connected. */
-  onSubscribed?: (() => void | Promise<void>) | undefined
-  /** Optional hook to be informed when the channel has disconnected. */
-  onUnsubscribed?: (() => void | Promise<void>) | undefined
 }
 
 export type UseChannel2Result<T extends JSONObject> = UseChannelResult<T> & {
@@ -66,7 +66,7 @@ export function useChannel2<T extends JSONObject>(
           delete peers[peer.player.sid]
           return peers
         })
-        opts.onPeerLeave?.(peer.player)
+        opts.onPeerDisconnected?.(peer.player)
       }
     }
     if (!Object.keys(peers).length) disconnectInterval.stop()
@@ -81,7 +81,7 @@ export function useChannel2<T extends JSONObject>(
           peers[msg.peer.sid] = {player: msg.peer, time: utcMillisNow()}
           return peers
         })
-        opts.onPeerJoin?.(msg.peer)
+        opts.onPeerConnected?.(msg.peer)
       }
       if (msg.version === opts.version) opts.onMessage(msg)
       else if (msg.version > opts.version)
@@ -89,9 +89,9 @@ export function useChannel2<T extends JSONObject>(
     },
     onSubscribed() {
       disconnectInterval.start()
-      opts.onSubscribed?.()
+      opts.onConnected?.()
     },
-    onUnsubscribed: opts.onUnsubscribed
+    onUnsubscribed: opts.onDisconnected
   })
 
   return {

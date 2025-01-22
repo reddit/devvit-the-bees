@@ -19,9 +19,9 @@ export type DevvitMessage =
     }
   | {type: 'Connected'}
   | {type: 'Disconnected'}
-  | PeerMessage
-  | {peer: Player; type: 'PeerJoin'}
-  | {peer: Player; type: 'PeerLeave'}
+  | {peer: Player; type: 'PeerConnected'}
+  | {peer: Player; type: 'PeerDisconnected'}
+  | PeerUpdatedMessage
 
 /** the devvit API wraps all messages from blocks to the iframe. */
 export type DevvitSystemMessage = {
@@ -31,13 +31,17 @@ export type DevvitSystemMessage = {
 
 /** a message from the iframe to devvit. */
 export type WebViewMessage =
-  | {type: 'Listening'}
+  /** iframe has registered a message listener. */
+  | {type: 'Registered'}
   | {p1: Player; type: 'NewGame'}
   | {p1: Player; type: 'Save'}
-  | PeerMessage
+  | PeerUpdatedMessage
 
 /** a realtime message from another instance. */
-export type PeerMessage = {type: 'Peer'; sync: PlayerSync} & RealtimeMessage
+export type PeerUpdatedMessage = {
+  type: 'PeerUpdated'
+  sync: PlayerSync
+} & RealtimeMessage
 
 // spawning, including waves, are deterministic. each player only spawns bullets for themselves
 // but local bullets spawned from another player can damage current player. that's the resolution.

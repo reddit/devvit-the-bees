@@ -4,7 +4,7 @@ import {ChannelStatus} from '@devvit/public-api/types/realtime'
 import {playButtonWidth} from '../../shared/theme.ts'
 import {
   type DevvitMessage,
-  type PeerMessage,
+  type PeerUpdatedMessage,
   type WebViewMessage,
   realtimeVersion
 } from '../../shared/types/message.ts'
@@ -31,7 +31,14 @@ export function App(ctx: Devvit.Context): JSX.Element {
       //   console.log(`${profile.username} App msg=${JSON.stringify(msg)}`)
 
       switch (msg.type) {
-        case 'Listening':
+        case 'NewGame':
+          // to-do: implement.
+          break
+        case 'PeerUpdated':
+          if (chan.status !== ChannelStatus.Connected) break
+          chan.send(msg)
+          break
+        case 'Registered':
           webView.postMessage({
             type: 'Init',
             debug: session.debug,
@@ -40,30 +47,25 @@ export function App(ctx: Devvit.Context): JSX.Element {
           })
           chan.subscribe() // to-do: verify platform unsubscribes hidden posts.
           break
-        case 'NewGame':
-          // to-do: implement.
-          break
         case 'Save':
           // to-do: implement.
-          break
-        case 'Peer':
-          if (chan.status !== ChannelStatus.Connected) break
-          chan.send(msg)
           break
         default:
           msg satisfies never
       }
     }
   })
-  const chan = useChannel2<PeerMessage>({
+  const chan = useChannel2<PeerUpdatedMessage>({
     chan: session.t3,
     onMessage: msg => webView.postMessage(msg),
     p1,
     version: realtimeVersion,
-    onPeerJoin: peer => webView.postMessage({peer: peer, type: 'PeerJoin'}),
-    onPeerLeave: peer => webView.postMessage({peer: peer, type: 'PeerLeave'}),
-    onSubscribed: () => webView.postMessage({type: 'Connected'}),
-    onUnsubscribed: () => webView.postMessage({type: 'Disconnected'})
+    onPeerConnected: peer =>
+      webView.postMessage({peer: peer, type: 'PeerConnected'}),
+    onPeerDisconnected: peer =>
+      webView.postMessage({peer: peer, type: 'PeerDisconnected'}),
+    onConnected: () => webView.postMessage({type: 'Connected'}),
+    onDisconnected: () => webView.postMessage({type: 'Disconnected'})
   })
 
   return (

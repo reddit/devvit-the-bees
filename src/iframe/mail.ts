@@ -5,6 +5,6 @@ export function postWebViewMessage(
   store: Readonly<Store>,
   msg: Readonly<WebViewMessage>
 ): void {
-  if (msg.type === 'Peer') store.devPeerChan?.postMessage(msg)
+  if (msg.type === 'PeerUpdated') store.devPeerChan?.postMessage(msg)
   parent.postMessage(msg, document.referrer || '*')
 }

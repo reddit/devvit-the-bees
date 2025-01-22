@@ -9,7 +9,7 @@ import type {XY} from '../shared/types/2d.ts'
 import {
   type DevvitMessage,
   type DevvitSystemMessage,
-  type PeerMessage,
+  type PeerUpdatedMessage,
   realtimeVersion
 } from '../shared/types/message.ts'
 import type {Seed} from '../shared/types/seed.ts'
@@ -32,7 +32,7 @@ export class Game {
 
   constructor() {
     this.store = new Store(new Promise(resolve => (this.#init = resolve)))
-    this.store.subscribe.onP1XY.add(xy => this.#onP1XY(xy))
+    this.store.on.p1XY.add(xy => this.#onP1XY(xy))
     const config: Phaser.Types.Core.GameConfig = {
       backgroundColor: '#f00000', // to-do: fix.
       width: minCanvasWH.w,
@@ -55,23 +55,23 @@ export class Game {
 
   start(): void {
     addEventListener('message', ev => this.#onMsg(ev))
-    postWebViewMessage(this.store, {type: 'Listening'})
+    postWebViewMessage(this.store, {type: 'Registered'})
 
     if (devMode) {
       this.store.devPeerChan?.addEventListener('message', ev => {
-        const msg: PeerMessage = ev.data
+        const msg: PeerUpdatedMessage = ev.data
         if (
           msg.peer.sid !== this.store.p1?.player.sid &&
           !(msg.peer.sid in this.store.peers)
         )
-          this.#onDevMsg({type: 'PeerJoin', peer: msg.peer})
+          this.#onDevMsg({type: 'PeerConnected', peer: msg.peer})
         this.#onDevMsg(ev.data)
       })
       this.#devPeerDisconnectInterval = setInterval(() => {
         const now = utcMillisNow()
         for (const peer of Object.values(this.store.peers)) {
           if (now - peer.sync.time > peerDefaultDisconnectMillis)
-            this.#onDevMsg({type: 'PeerLeave', peer: peer.player})
+            this.#onDevMsg({type: 'PeerDisconnected', peer: peer.player})
         }
       }, peerDisconnectIntervalMillis)
 
@@ -94,13 +94,10 @@ export class Game {
           seed: {seed: seed as Seed},
           type: 'Init'
         })
-        setTimeout(() => {
-          this.#onDevMsg({type: 'Connected'})
-          setTimeout(
-            () => this.#onDevMsg({type: 'PeerJoin', peer: p1}),
-            Phaser.Math.RND.integer() % 1000
-          )
-        }, Phaser.Math.RND.integer() % 1000)
+        setTimeout(
+          () => this.#onDevMsg({type: 'Connected'}),
+          Phaser.Math.RND.integer() % 1000
+        )
       }, Phaser.Math.RND.integer() % 1000)
     }
   }
@@ -139,19 +136,15 @@ export class Game {
       case 'Connected':
         if (this.store.debug)
           console.log(`${this.store.p1.player.profile.username} connected`)
-        this.#postP1PeerMessage()
+        this.#postP1PeerUpdated()
         break
       case 'Disconnected':
         if (this.store.debug)
           console.log(`${this.store.p1.player.profile.username} disconnected`)
         break
-      case 'Peer':
-        this.store.peers[msg.peer.sid]!.sync = msg.sync
-        this.store.onPeerMessage(msg)
-        break
-      case 'PeerJoin':
+      case 'PeerConnected':
         if (this.store.debug) console.log(`${msg.peer.profile.username} joined`)
-        this.store.onPeerJoin({
+        this.store.onPeerConnected({
           player: msg.peer,
           sync: {
             dir: {x: 0, y: 0},
@@ -161,12 +154,16 @@ export class Game {
           xy: {x: -9999, y: -9999}
         })
         break
-      case 'PeerLeave': {
+      case 'PeerDisconnected': {
         if (this.store.debug) console.log(`${msg.peer.profile.username} left`)
         const state = this.store.peers[msg.peer.sid]
-        if (state) this.store.onPeerLeave(state)
+        if (state) this.store.onPeerDisconnected(state)
         break
       }
+      case 'PeerUpdated':
+        this.store.peers[msg.peer.sid]!.sync = msg.sync
+        this.store.onPeerUpdated(msg)
+        break
       default:
         msg satisfies never
     }
@@ -181,19 +178,19 @@ export class Game {
         xy.y
       ) > 5 || utcMillisNow() - this.store.p1.sync.time > peerMaxSyncInterval
     if (!significant) return
-    this.#postP1PeerMessage()
+    this.#postP1PeerUpdated()
   }
 
   #onResize(): void {
     for (const scene of this.store.phaser.scene.getScenes()) centerCam(scene)
   }
 
-  #postP1PeerMessage(): void {
+  #postP1PeerUpdated(): void {
     // to-do: dir.
     this.store.p1.sync.time = utcMillisNow()
     this.store.p1.sync.xy = this.store.p1.xy
     postWebViewMessage(this.store, {
-      type: 'Peer',
+      type: 'PeerUpdated',
       peer: this.store.p1.player,
       sync: this.store.p1.sync,
       version: realtimeVersion

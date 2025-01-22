@@ -1,5 +1,5 @@
 import {minCanvasWH} from '../../shared/theme.js'
-import type {PeerMessage} from '../../shared/types/message.js'
+import type {PeerUpdatedMessage} from '../../shared/types/message.js'
 import type {SID} from '../../shared/types/sid.js'
 import {centerCam} from '../game.js'
 import {Bee} from '../objects/bee.js'
@@ -50,16 +50,17 @@ export class Shmup extends Phaser.Scene {
       cam.height / 2 - (3 * this.p1.height) / 4
     )
 
-    for (const peer of Object.values(this.#store.peers)) this.#onPeerJoin(peer)
-    this.#store.subscribe.onPeerJoin.add(this.#onPeerJoin)
-    this.#store.subscribe.onPeerLeave.add(this.#onPeerLeave)
-    this.#store.subscribe.onPeerMessage.add(this.#onPeerMessage)
+    for (const peer of Object.values(this.#store.peers))
+      this.#onPeerConnected(peer)
+    this.#store.on.peerConnected.add(this.#onPeerConnected)
+    this.#store.on.peerDisconnected.add(this.#onPeerDisconnected)
+    this.#store.on.peerUpdated.add(this.#onPeerUpdated)
   }
 
   destroy(): void {
-    this.#store.subscribe.onPeerJoin.delete(this.#onPeerJoin)
-    this.#store.subscribe.onPeerLeave.delete(this.#onPeerLeave)
-    this.#store.subscribe.onPeerMessage.delete(this.#onPeerMessage)
+    this.#store.on.peerConnected.delete(this.#onPeerConnected)
+    this.#store.on.peerDisconnected.delete(this.#onPeerDisconnected)
+    this.#store.on.peerUpdated.delete(this.#onPeerUpdated)
   }
 
   getBeeXY(): Phaser.Math.Vector2 {
@@ -85,16 +86,16 @@ export class Shmup extends Phaser.Scene {
     }
   }
 
-  #onPeerJoin = (state: Readonly<PlayerState>): void => {
+  #onPeerConnected = (state: Readonly<PlayerState>): void => {
     this.#peers[state.player.sid] = new Bee(this, this.#store, state)
   }
 
-  #onPeerLeave = (state: Readonly<PlayerState>): void => {
+  #onPeerDisconnected = (state: Readonly<PlayerState>): void => {
     this.#peers[state.player.sid]?.destroy()
     delete this.#peers[state.player.sid]
   }
 
-  #onPeerMessage = (msg: Readonly<PeerMessage>): void => {
+  #onPeerUpdated = (msg: Readonly<PeerUpdatedMessage>): void => {
     const bee = this.#peers[msg.peer.sid]
     if (!bee) return
     bee.x = msg.sync.xy.x
