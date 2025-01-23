@@ -23,4 +23,4 @@ export const uiScaleMax: number = 4 // to-do: fix.
 
 export const peerDisconnectIntervalMillis: number = 1_000
 export const peerDefaultDisconnectMillis: number = 15_000
-export const peerMaxSyncInterval: number = 5_000
+export const peerMaxSyncInterval: number = 1_000

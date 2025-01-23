@@ -31,9 +31,9 @@ export type UseChannel2Opts<T extends RealtimeMessage & JSONObject> = {
   onConnected?: (() => void | Promise<void>) | undefined
   /** Optional hook to be informed when the channel has disconnected. */
   onDisconnected?: (() => void | Promise<void>) | undefined
-  /** Called every time a message is received on this channel. */
-  onMessage(msg: T): void
   onPeerConnected?: ((msg: T) => void) | undefined
+  /** Called every time a message is received on this channel. */
+  onPeerMessage(msg: T): void
   onPeerDisconnected?: ((peer: Readonly<Player>) => void) | undefined
   p1: Player
   /**
@@ -83,7 +83,7 @@ export function useChannel2<T extends JSONObject>(
         })
         opts.onPeerConnected?.(msg)
       }
-      if (msg.version === opts.version) opts.onMessage(msg)
+      if (msg.version === opts.version) opts.onPeerMessage(msg)
       else if (msg.version > opts.version)
         console.info(`ignored v${msg.version} message`)
     },
@@ -91,7 +91,9 @@ export function useChannel2<T extends JSONObject>(
       disconnectInterval.start()
       opts.onConnected?.()
     },
-    onUnsubscribed: opts.onDisconnected
+    onUnsubscribed() {
+      opts.onDisconnected?.()
+    }
   })
 
   return {

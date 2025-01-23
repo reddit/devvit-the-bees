@@ -1,10 +1,13 @@
 import {minCanvasWH} from '../../shared/theme.ts'
 import {centerCam} from '../game.ts'
+import type {Store} from '../store.ts'
 import {Shmup} from './shmup.ts'
 
 export class Title extends Phaser.Scene {
-  constructor() {
+  #store: Store
+  constructor(store: Store) {
     super(new.target.name)
+    this.#store = store
   }
 
   create(): void {
@@ -26,6 +29,8 @@ export class Title extends Phaser.Scene {
     this.input.on('pointerdown', () => {
       this.scene.start(Shmup.name)
     })
+
+    this.#store.setP1XY({x: 0, y: 0})
   }
 
   init(): void {

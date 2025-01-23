@@ -57,7 +57,7 @@ export function App(ctx: Devvit.Context): JSX.Element {
   })
   const chan = useChannel2<PeerUpdatedMessage>({
     chan: session.t3,
-    onMessage: msg => webView.postMessage(msg),
+    onPeerMessage: msg => webView.postMessage(msg),
     p1,
     version: realtimeVersion,
     onPeerConnected: msg =>

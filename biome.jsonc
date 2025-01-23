@@ -38,6 +38,7 @@
         "useNumberNamespace": "off",
         // https://github.com/biomejs/biome/discussions/3106
         "useImportType": "warn",
+        "useTemplate": "warn",
         "noUnusedTemplateLiteral": "warn"
       },
       "suspicious": {

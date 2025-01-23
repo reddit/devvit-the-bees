@@ -50,20 +50,20 @@ export class Bee extends Phaser.Physics.Arcade.Sprite {
   protected override preUpdate(time: number, delta: number): void {
     super.preUpdate(time, delta)
 
-    if (this.#store.p1.player.sid !== this.#state.player.sid) return
+    if (this.#store.p1.player.sid === this.#state.player.sid) {
+      const cam = this.scene.cameras.main
+      const pointer = this.scene.input.activePointer
+      const pointerXY = pointer.positionToCamera(cam) as Phaser.Math.Vector2
+      this.#target.x = pointer.isDown ? pointerXY.x : this.x
+      this.#target.y = this.y - 10 // to-do: bounds.
 
-    const cam = this.scene.cameras.main
-    const pointer = this.scene.input.activePointer
-    const pointerXY = pointer.positionToCamera(cam) as Phaser.Math.Vector2
-    this.#target.x = pointer.isDown ? pointerXY.x : this.x
-    this.#target.y = this.y - 10 // to-do: bounds.
-
-    // to-do: detect desktop, disable point movement, and enable wasd.
-    this.scene.physics.moveToObject(this, this.#target, speed)
+      // to-do: detect desktop, disable point movement, and enable wasd.
+      this.scene.physics.moveToObject(this, this.#target, speed)
+      this.#store.setP1XY({x: this.x, y: this.y})
+    }
 
     this.#text.x = this.x - this.#text.width / 2
     this.#text.y = this.y + this.height / 2 - 4
-    this.#store.setP1XY({x: this.x, y: this.y})
   }
 
   start(): void {

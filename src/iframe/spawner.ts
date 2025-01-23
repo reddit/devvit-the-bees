@@ -11,6 +11,7 @@ export class Spawner {
   #store: Store
   #waveIndex: number = -1
   #waves: Wave[] = []
+  #index: number = 0
 
   constructor(store: Store) {
     this.#store = store
@@ -22,6 +23,13 @@ export class Spawner {
       this.#waves.push({y0: y, y1: y + h})
       y += h
     }
+  }
+
+  kill(eid: EID): void {
+    const wasp = this.#enemies[eid]
+    if (!wasp) return
+    delete this.#enemies[eid]
+    wasp.kill()
   }
 
   spawn(scene: Shmup, y: number): Wasp[] {
@@ -40,8 +48,10 @@ export class Spawner {
     const wEnd = 350
     const groupMin = 1
     const groupMax = 10
-    const minSpeed = 10
-    const maxSpeed = 20
+    const xWiggleMin = 5
+    const xWiggleMax = 50
+    const yWiggleMin = 5
+    const yWiggleMax = 50
     if (this.#store.debug)
       console.log(
         `spawning eid-${this.#store.seed.seed}-${waveIndex} at ${utcMillisNow()}`
@@ -54,14 +64,21 @@ export class Spawner {
     ) {
       const total = rnd.integerInRange(groupMin, groupMax)
       for (let i = 0; i < total; i++) {
+        this.#index++
+        const eid =
+          `eid-${this.#store.seed.seed}-${waveIndex}-${this.#index}` as const
         const wasp = new Wasp(
           scene,
-          x + rnd.integerInRange(5, 50),
-          Math.sign(y) * wave.y1 - rnd.integerInRange(5, 50),
-          rnd.integerInRange(minSpeed, maxSpeed)
+          x + rnd.integerInRange(xWiggleMin, xWiggleMax),
+          Math.sign(y) * wave.y1 - rnd.integerInRange(yWiggleMin, yWiggleMax),
+          rnd.realInRange(0.5, 1),
+          rnd.frac() * 25,
+          rnd.frac() * 10_000,
+          this.#store,
+          eid
         )
         wasps.push(wasp)
-        this.#enemies[`eid-${this.#store.seed.seed}-${waveIndex}-${i}`] = wasp
+        this.#enemies[eid] = wasp
       }
     }
     return wasps

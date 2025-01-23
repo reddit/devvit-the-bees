@@ -1,3 +1,4 @@
+import type {EID} from '../../shared/types/eid.js'
 import type {PeerUpdatedMessage} from '../../shared/types/message.js'
 import type {SID} from '../../shared/types/sid.js'
 import {centerCam} from '../game.js'
@@ -92,10 +93,8 @@ export class Shmup extends Phaser.Scene {
 
       this.sound.stopAll()
 
-      this.input.once('pointerdown', () => {
-        this.destroy()
-        this.scene.start(GameOver.name)
-      })
+      this.destroy()
+      this.scene.start(GameOver.name)
     }
   }
 
@@ -117,6 +116,10 @@ export class Shmup extends Phaser.Scene {
     if (!bee) return
     bee.x = msg.sync.xy.x
     bee.y = msg.sync.xy.y
+    this.p1.y = Math.min(this.p1.y, bee.y)
+    for (const hit of Object.keys(msg.sync.hits)) {
+      this.#store.spawner.kill(hit as EID)
+    }
     // to-do: dir, tween.
   }
 }

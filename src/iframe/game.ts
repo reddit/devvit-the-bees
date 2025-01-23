@@ -36,13 +36,12 @@ export class Game {
       backgroundColor: '#f00000', // to-do: fix.
       width: minCanvasWH.w,
       height: minCanvasWH.h,
-      pixelArt: true,
       physics: {default: 'arcade'},
       scale: {autoCenter: Phaser.Scale.CENTER_BOTH, mode: Phaser.Scale.EXPAND},
       scene: [
         Preload,
         new Loading(this.store),
-        Title,
+        new Title(this.store),
         new Shmup(this.store),
         GameOver
       ],
@@ -74,17 +73,18 @@ export class Game {
         }
       }, peerDisconnectIntervalMillis)
 
-      const seed = Date.now()
+      const seedStr = new URL(location.href).searchParams.get('seed')
+      const seed = seedStr ? Number.parseInt(seedStr) : Date.now()
       console.log(`seed=${seed}`)
-
-      // get a deterministic delay. this will get reset in init with the same seed
-      // which will cause the next calls to return the same sequence but that's ok.
-      Phaser.Math.RND.sow([`${seed}`])
 
       const p1 = {
         profile: devProfiles[Phaser.Math.RND.integer() % devProfiles.length]!,
         sid: SID()
       }
+
+      // get a deterministic delay. this will get reset in init with the same seed
+      // which will cause the next calls to return the same sequence but that's ok.
+      Phaser.Math.RND.sow([`${seed}`])
 
       setTimeout(() => {
         this.#onDevMsg({
@@ -162,7 +162,9 @@ export class Game {
         this.store.p1.sync.xy.y,
         xy.x,
         xy.y
-      ) > 5 || utcMillisNow() - this.store.p1.sync.time > peerMaxSyncInterval
+      ) > 5 ||
+      utcMillisNow() - this.store.p1.sync.time > peerMaxSyncInterval ||
+      Object.keys(this.store.p1.sync.hits).length
     if (!significant) return
     this.#postP1PeerUpdated()
   }
@@ -181,6 +183,7 @@ export class Game {
       sync: this.store.p1.sync,
       version: realtimeVersion
     })
+    this.store.p1.sync.hits = {}
   }
 }
 
