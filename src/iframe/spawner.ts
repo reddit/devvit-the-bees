@@ -47,7 +47,7 @@ export class Spawner {
     const wStart = 100 // to-do: extract.
     const wEnd = 350
     const groupMin = 1
-    const groupMax = 10
+    const groupMax = 50
     const xWiggleMin = 5
     const xWiggleMax = 50
     const yWiggleMin = 5

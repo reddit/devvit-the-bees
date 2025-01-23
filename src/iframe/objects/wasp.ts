@@ -67,7 +67,8 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
 
     this.#dead = false
     this.setInteractive()
-    this.once(Phaser.Input.Events.POINTER_DOWN, () => {
+    this.on('pointerdown', () => {
+      this.disableInteractive()
       this.kill()
       this.#store.p1.sync.hits[this.#eid] ??= 0
       this.#store.p1.sync.hits[this.#eid]!++
@@ -77,7 +78,7 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
 
   kill(): void {
     this.#tween.destroy()
-    this.scene.sound.play('doot')
+    this.scene?.sound.play('doot')
     this.once('animationcomplete-wasp--Splat', () => {
       this.setVisible(false)
       this.setActive(false)
