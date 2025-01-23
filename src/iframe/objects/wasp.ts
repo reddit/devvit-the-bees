@@ -77,13 +77,13 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
   }
 
   kill(): void {
+    if (!this.scene) return // to-do: fix ultra hack for destroying.
     this.#tween.destroy()
-    this.scene?.sound.play('doot')
+    this.scene.sound.play('doot')
     this.once('animationcomplete-wasp--Splat', () => {
       this.setVisible(false)
       this.setActive(false)
       this.destroy()
-      console.log('dead')
     })
     this.play('wasp--Splat')
     this.#dead = true

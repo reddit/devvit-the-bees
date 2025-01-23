@@ -11,7 +11,6 @@ export class Spawner {
   #store: Store
   #waveIndex: number = -1
   #waves: Wave[] = []
-  #index: number = 0
 
   constructor(store: Store) {
     this.#store = store
@@ -27,9 +26,17 @@ export class Spawner {
 
   kill(eid: EID): void {
     const wasp = this.#enemies[eid]
-    if (!wasp) return
+    if (!wasp) {
+      console.log('eid already dead', eid)
+      return
+    }
     delete this.#enemies[eid]
     wasp.kill()
+  }
+
+  killAll(): void {
+    for (const eid in this.#enemies) this.kill(eid as EID)
+    this.#enemies = {}
   }
 
   spawn(scene: Shmup, y: number): Wasp[] {
@@ -57,6 +64,7 @@ export class Spawner {
         `spawning eid-${this.#store.seed.seed}-${waveIndex} at ${utcMillisNow()}`
       )
     const wasps = []
+    let index = 0
     for (
       let x = worldXStart;
       x < worldW;
@@ -64,9 +72,9 @@ export class Spawner {
     ) {
       const total = rnd.integerInRange(groupMin, groupMax)
       for (let i = 0; i < total; i++) {
-        this.#index++
+        index++
         const eid =
-          `eid-${this.#store.seed.seed}-${waveIndex}-${this.#index}` as const
+          `eid-${this.#store.seed.seed}-${waveIndex}-${index}` as const
         const wasp = new Wasp(
           scene,
           x + rnd.integerInRange(xWiggleMin, xWiggleMax),
@@ -78,6 +86,7 @@ export class Spawner {
           eid
         )
         wasps.push(wasp)
+        if (this.#enemies[eid]) throw Error('dup')
         this.#enemies[eid] = wasp
       }
     }

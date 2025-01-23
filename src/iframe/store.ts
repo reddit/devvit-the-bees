@@ -45,15 +45,16 @@ export class Store {
 
   init(msg: InitDevvitMessage): void {
     this.debug = msg.debug
+    const xy = {x: 100 - Math.random() * 200, y: 0} // to-do: should this be deterministic?
     this.p1 = {
       player: msg.p1,
       sync: {
         dir: {x: 0, y: 0},
         hits: {},
         time: 0 as UTCMillis,
-        xy: {x: 0, y: 0}
+        xy: {x: xy.x, y: xy.y}
       },
-      xy: {x: 0, y: 0}
+      xy: {x: xy.x, y: xy.y}
     }
     this.seed = msg.seed
     this.spawner = new Spawner(this)

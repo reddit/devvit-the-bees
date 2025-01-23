@@ -93,6 +93,7 @@ export class Shmup extends Phaser.Scene {
 
       this.sound.stopAll()
 
+      this.#store.spawner.killAll()
       this.destroy()
       this.scene.start(GameOver.name)
     }
