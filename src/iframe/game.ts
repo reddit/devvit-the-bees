@@ -14,7 +14,7 @@ import {
 } from '../shared/types/message.ts'
 import type {Seed} from '../shared/types/seed.ts'
 import {SID} from '../shared/types/sid.ts'
-import {type UTCMillis, utcMillisNow} from '../shared/types/time.ts'
+import {utcMillisNow} from '../shared/types/time.ts'
 import {devProfiles} from './dev/dev-profiles.ts'
 import {postWebViewMessage} from './mail.ts'
 import {GameOver} from './scenes/game-over.ts'
@@ -28,17 +28,16 @@ export class Game {
   readonly store: Store
 
   #devPeerDisconnectInterval?: number
-  #init!: () => void
 
   constructor() {
-    this.store = new Store(new Promise(resolve => (this.#init = resolve)))
+    this.store = new Store()
     this.store.on.p1XY.add(xy => this.#onP1XY(xy))
     const config: Phaser.Types.Core.GameConfig = {
       backgroundColor: '#f00000', // to-do: fix.
       width: minCanvasWH.w,
       height: minCanvasWH.h,
       pixelArt: true,
-      physics: {default: 'arcade', arcade: {debug: true}},
+      physics: {default: 'arcade'},
       scale: {autoCenter: Phaser.Scale.CENTER_BOTH, mode: Phaser.Scale.EXPAND},
       scene: [
         Preload,
@@ -64,7 +63,7 @@ export class Game {
           msg.peer.sid !== this.store.p1?.player.sid &&
           !(msg.peer.sid in this.store.peers)
         )
-          this.#onDevMsg({type: 'PeerConnected', peer: msg.peer})
+          this.#onDevMsg({...msg, type: 'PeerConnected'})
         this.#onDevMsg(ev.data)
       })
       this.#devPeerDisconnectInterval = setInterval(() => {
@@ -122,16 +121,7 @@ export class Game {
 
     switch (msg.type) {
       case 'Init':
-        this.store.debug = msg.debug
-        this.store.p1 = {
-          player: msg.p1,
-          sync: {dir: {x: 0, y: 0}, time: 0 as UTCMillis, xy: {x: 0, y: 0}},
-          xy: {x: 0, y: 0}
-        } // to-do: XY
-        Phaser.Math.RND.sow([`${msg.seed.seed}`])
-        if (this.store.debug)
-          console.log(`${this.store.p1.player.profile.username} init`)
-        this.#init()
+        this.store.init(msg)
         break
       case 'Connected':
         if (this.store.debug)
@@ -146,12 +136,8 @@ export class Game {
         if (this.store.debug) console.log(`${msg.peer.profile.username} joined`)
         this.store.onPeerConnected({
           player: msg.peer,
-          sync: {
-            dir: {x: 0, y: 0},
-            time: utcMillisNow(),
-            xy: {x: -9999, y: -9999}
-          }, // to-do: XY, dir.
-          xy: {x: -9999, y: -9999}
+          sync: msg.sync,
+          xy: msg.sync.xy
         })
         break
       case 'PeerDisconnected': {
@@ -200,6 +186,7 @@ export class Game {
 
 export function centerCam(scene: Phaser.Scene): void {
   const cam = scene.cameras.main
+  // to-do: fix me; this breaks follow cam.
   cam.scrollX = -(scene.scale.width - minCanvasWH.w) / 2
   cam.scrollY = -(scene.scale.height - minCanvasWH.h) / 2
 }

@@ -33,7 +33,7 @@ export type UseChannel2Opts<T extends RealtimeMessage & JSONObject> = {
   onDisconnected?: (() => void | Promise<void>) | undefined
   /** Called every time a message is received on this channel. */
   onMessage(msg: T): void
-  onPeerConnected?: ((peer: Readonly<Player>) => void) | undefined
+  onPeerConnected?: ((msg: T) => void) | undefined
   onPeerDisconnected?: ((peer: Readonly<Player>) => void) | undefined
   p1: Player
   /**
@@ -81,7 +81,7 @@ export function useChannel2<T extends JSONObject>(
           peers[msg.peer.sid] = {player: msg.peer, time: utcMillisNow()}
           return peers
         })
-        opts.onPeerConnected?.(msg.peer)
+        opts.onPeerConnected?.(msg)
       }
       if (msg.version === opts.version) opts.onMessage(msg)
       else if (msg.version > opts.version)

@@ -21,10 +21,10 @@ export class Loading extends Phaser.Scene {
     for (const anim of this.anims.createFromAseprite('atlas')) {
       const tag = atlas.meta.frameTags.find(tag => tag.name === anim.key)
       if (!tag) throw Error(`no ${anim.key} tag`)
-      anim.repeat = 'repeat' in tag ? (tag.repeat as number) : -1
+      anim.repeat = 'repeat' in tag ? Number.parseInt(tag.repeat) - 1 : -1
     }
 
-    void this.#store.init.then(() => this.scene.start(Title.name))
+    void this.#store.promise.then(() => this.scene.start(Title.name))
   }
 
   init(): void {
@@ -40,5 +40,6 @@ export class Loading extends Phaser.Scene {
     this.load.setPath('assets')
     this.load.audio('doot', 'sounds/doot.mp3')
     this.load.aseprite('atlas', 'images/atlas.png', 'images/atlas.json')
+    this.load.image('level', 'images/level.png')
   }
 }

@@ -60,10 +60,10 @@ export function App(ctx: Devvit.Context): JSX.Element {
     onMessage: msg => webView.postMessage(msg),
     p1,
     version: realtimeVersion,
-    onPeerConnected: peer =>
-      webView.postMessage({peer: peer, type: 'PeerConnected'}),
+    onPeerConnected: msg =>
+      webView.postMessage({...msg, type: 'PeerConnected'}),
     onPeerDisconnected: peer =>
-      webView.postMessage({peer: peer, type: 'PeerDisconnected'}),
+      webView.postMessage({peer, type: 'PeerDisconnected'}),
     onConnected: () => webView.postMessage({type: 'Connected'}),
     onDisconnected: () => webView.postMessage({type: 'Disconnected'})
   })

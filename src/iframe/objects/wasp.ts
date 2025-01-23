@@ -23,45 +23,40 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
   }
 
   start(): void {
-    const cam = this.scene.cameras.main
-    const x = Phaser.Math.RND.frac() * cam.width
-    this.#path = new Phaser.Curves.Path(cam.x - this.width, 100)
-      .lineTo(x, 100)
+    this.x -= 400
+    this.y -= 300
+    this.#path = new Phaser.Curves.Path(this.x, this.y)
+      .lineTo(this.x, this.y)
       .circleTo(50 + Phaser.Math.RND.frac() * 25)
-      .lineTo(x, 900)
+      .lineTo(this.x, this.y + 900)
 
     this.scene.tweens.add({
       targets: this.tween,
       t: 1,
       ease: 'Sine.easeInOut',
-      duration: 12_000 + Phaser.Math.RND.frac() * 4_000
+      duration: 12_000 + Phaser.Math.RND.frac() * 10_000,
+      onComplete: () => {
+        this.stop()
+      }
     })
 
     const radius = this.width / 4
     this.setCircle(radius, this.width / 4, this.height / 4)
     this.body.enable = true
 
-    // this.scene.tweens.add({
-    //   targets: this,
-    //   alpha: 1,
-    //   duration: 2000,
-    //   ease: 'Linear',
-    //   hold: Phaser.Math.RND.between(3000, 8000),
-    //   onComplete: () => {
-    //     if (this.scene.bee.isAlive) {
-    //       this.#lifespan = Phaser.Math.RND.between(6000, 12000)
-    //     }
-    //   }
-    // })
-
     this.#dead = false
     this.setInteractive()
     this.once(Phaser.Input.Events.POINTER_DOWN, () => {
       this.scene.sound.play('doot')
-      this.play('wasp--Squished')
+      this.play('wasp--Splat')
+      this.once('animationcomplete-wasp--Splat', () => {
+        this.setVisible(false)
+        this.setActive(false)
+      })
       this.#dead = true
-      this.stop()
+      this.body.enable = false
     })
+    this.scene.add.existing(this)
   }
 
   restart(x: number, y: number): void {
@@ -80,24 +75,6 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
 
     if (this.#lifespan <= 0) {
       this.body.stop()
-
-      // this.scene.tweens.add({
-      //   targets: this,
-      //   alpha: 0,
-      //   duration: 1000,
-      //   ease: 'Linear',
-      //   onComplete: () => {
-      //     this.setActive(false)
-      //     this.setVisible(false)
-      //   }
-      // })
-      // } else {
-      //   this.#target = this.scene.getBeeXY()
-
-      //   this.rotation =
-      //     this.scene.physics.moveToObject(this, this.#target, this.#speed) +
-      //     (3 * Math.PI) / 2
-      // }
     }
   }
 

@@ -1,8 +1,14 @@
 import {devMode} from '../shared/dev-mode.ts'
-import type {Player} from '../shared/save.ts'
+import type {Player, PostSeed} from '../shared/save.ts'
 import type {XY} from '../shared/types/2d.ts'
-import type {PeerUpdatedMessage, PlayerSync} from '../shared/types/message.ts'
+import type {
+  InitDevvitMessage,
+  PeerUpdatedMessage,
+  PlayerSync
+} from '../shared/types/message.ts'
 import type {SID} from '../shared/types/sid.ts'
+import type {UTCMillis} from '../shared/types/time.ts'
+import {Spawner} from './spawner.ts'
 
 export type PlayerState = {player: Player; sync: PlayerSync; xy: XY}
 
@@ -18,20 +24,42 @@ export class Store {
   readonly devPeerChan: BroadcastChannel | undefined = devMode
     ? new BroadcastChannel('dev')
     : undefined
-  readonly init: Promise<void>
-  /** undefined until Init message. */
-  p1!: PlayerState
-  phaser!: Phaser.Game
+  readonly promise: Promise<void>
   readonly on: Readonly<SubscribeMap> = {
     p1XY: new Set(),
     peerConnected: new Set(),
     peerDisconnected: new Set(),
     peerUpdated: new Set()
   }
+  /** undefined until InitDevvitMessage. */
+  p1!: PlayerState
+  phaser!: Phaser.Game
+  seed!: PostSeed
+  spawner!: Spawner
   readonly #peers: {[sid: SID]: PlayerState} = {}
+  #resolve!: () => void
 
-  constructor(init: Promise<void>) {
-    this.init = init
+  constructor() {
+    this.promise = new Promise(resolve => (this.#resolve = resolve))
+  }
+
+  init(msg: InitDevvitMessage): void {
+    this.debug = msg.debug
+    this.p1 = {
+      player: msg.p1,
+      sync: {
+        dir: {x: 0, y: 0},
+        hits: {},
+        time: 0 as UTCMillis,
+        xy: {x: 0, y: 0}
+      },
+      xy: {x: 0, y: 0}
+    }
+    this.seed = msg.seed
+    this.spawner = new Spawner(this)
+    // Phaser.Math.RND.sow([`${msg.seed.seed}`])
+    this.#resolve()
+    if (this.debug) console.log(`${this.p1.player.profile.username} init`)
   }
 
   onPeerConnected(state: PlayerState): void {

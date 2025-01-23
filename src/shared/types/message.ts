@@ -1,5 +1,6 @@
 import type {Player, PostSeed} from '../save.ts'
 import type {XY} from './2d.ts'
+import type {EID} from './eid.ts'
 import type {UTCMillis} from './time.ts'
 
 /**
@@ -7,21 +8,23 @@ import type {UTCMillis} from './time.ts'
  * followed by Connected.
  */
 export type DevvitMessage =
-  | {
-      /**
-       * configure iframe lifetime debug mode. this is by request in devvit but that
-       * granularity doesn't make sense in the iframe.
-       */
-      debug: boolean
-      p1: Player
-      seed: PostSeed
-      type: 'Init'
-    }
+  | InitDevvitMessage
   | {type: 'Connected'}
   | {type: 'Disconnected'}
-  | {peer: Player; type: 'PeerConnected'}
+  | (Omit<PeerUpdatedMessage, 'type'> & {type: 'PeerConnected'})
   | {peer: Player; type: 'PeerDisconnected'}
   | PeerUpdatedMessage
+
+export type InitDevvitMessage = {
+  /**
+   * configure iframe lifetime debug mode. this is by request in devvit but that
+   * granularity doesn't make sense in the iframe.
+   */
+  debug: boolean
+  p1: Player
+  seed: PostSeed
+  type: 'Init'
+}
 
 /** the devvit API wraps all messages from blocks to the iframe. */
 export type DevvitSystemMessage = {
@@ -47,9 +50,7 @@ export type PeerUpdatedMessage = {
 // but local bullets spawned from another player can damage current player. that's the resolution.
 export type PlayerSync = {
   dir: XY
-  // bullets: {[ent: V4]: XY}, // dir
-  // hits: {[ent: V4]: number}
-  // hp: number
+  hits: {[eid: EID]: number}
   time: UTCMillis
   xy: XY
 }

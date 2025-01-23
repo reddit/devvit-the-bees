@@ -1,9 +1,7 @@
-import {minCanvasWH} from '../../shared/theme.js'
 import type {PeerUpdatedMessage} from '../../shared/types/message.js'
 import type {SID} from '../../shared/types/sid.js'
 import {centerCam} from '../game.js'
 import {Bee} from '../objects/bee.js'
-import {WaspGroup} from '../objects/wasp-group.js'
 import type {Wasp} from '../objects/wasp.js'
 import type {PlayerState, Store} from '../store.js'
 import {GameOver} from './game-over.js'
@@ -12,7 +10,6 @@ export class Shmup extends Phaser.Scene {
   p1!: Bee
   readonly #peers: {[sid: SID]: Bee} = {}
   readonly #store: Store
-  #wasps!: WaspGroup
 
   constructor(store: Store) {
     super(new.target.name)
@@ -21,20 +18,25 @@ export class Shmup extends Phaser.Scene {
 
   create(): void {
     const cam = this.cameras.main
-    this.add.image(minCanvasWH.w / 2, minCanvasWH.h / 2, 'background')
 
-    this.#wasps = new WaspGroup(this.physics.world, this)
+    // to-do: implement Aseprite tilemap loader or switch to another level
+    //        editor. this is the officially recommended Phaser approach for
+    //        converting an image to a tiled image but it easily causes an OOM.
+    const levelBounds = this.textures.get('level').getFrameBounds()
+    this.add.tileSprite(
+      0,
+      0,
+      levelBounds.width * 10,
+      levelBounds.height * 10,
+      'level'
+    )
+
     this.p1 = new Bee(this, this.#store, this.#store.p1)
     // to-do: position
     // this.bee.x = cam.width / 2 // - this.bee.width
     // this.bee.y = cam.height - this.bee.height / 2
 
     this.p1.start()
-    this.#wasps.start()
-
-    this.physics.add.overlap(this.p1, this.#wasps, (bee, wasp) =>
-      this.#onBeeHitWasp(bee as Bee, wasp as Wasp)
-    )
 
     const bounds = {x: -1600, y: -900, w: 3200, h: 2400}
     this.physics.world.setBounds(bounds.x, bounds.y, bounds.w, bounds.h)
@@ -71,11 +73,22 @@ export class Shmup extends Phaser.Scene {
     centerCam(this)
   }
 
+  override update(time: number, delta: number): void {
+    super.update(time, delta)
+    for (const wasp of this.#store.spawner.spawn(this, this.p1.y)) {
+      this.physics.add.existing(wasp)
+      this.physics.add.overlap(this.p1, wasp, (bee, wasp) =>
+        this.#onBeeHitWasp(bee as Bee, wasp as Wasp)
+      )
+      wasp.start()
+    }
+  }
+
   // to-do: can this move to Bee?
   #onBeeHitWasp(bee: Bee, wasp: Wasp): void {
     if (bee.isAlive && wasp.alpha === 1) {
       this.p1.kill()
-      this.#wasps.stop()
+      wasp.stop()
 
       this.sound.stopAll()
 
@@ -88,6 +101,10 @@ export class Shmup extends Phaser.Scene {
 
   #onPeerConnected = (state: Readonly<PlayerState>): void => {
     this.#peers[state.player.sid] = new Bee(this, this.#store, state)
+    this.#store.setP1XY({
+      x: this.#store.p1.xy.x,
+      y: Math.min(this.#store.p1.xy.y, state.sync.xy.x)
+    })
   }
 
   #onPeerDisconnected = (state: Readonly<PlayerState>): void => {
