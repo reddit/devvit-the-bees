@@ -79,7 +79,9 @@ export class Wasp extends Phaser.Physics.Arcade.Sprite {
   kill(): void {
     if (!this.scene) return // to-do: fix ultra hack for destroying.
     this.#tween.destroy()
-    this.scene.sound.play('doot')
+    // to-do: clarify which rnd is doing what.
+    const rnd = new Phaser.Math.RandomDataGenerator()
+    this.scene.sound.play(`squish${rnd.integerInRange(0, 2)}`)
     this.once('animationcomplete-wasp--Splat', () => {
       this.setVisible(false)
       this.setActive(false)

@@ -39,6 +39,9 @@ export class Loading extends Phaser.Scene {
     // load data.
     this.load.setPath('assets')
     this.load.audio('doot', 'sounds/doot.mp3')
+    this.load.audio('squish0', 'sounds/squish0.mp3')
+    this.load.audio('squish1', 'sounds/squish1.mp3')
+    this.load.audio('squish2', 'sounds/squish2.mp3')
     this.load.aseprite('atlas', 'images/atlas.png', 'images/atlas.json')
     this.load.image('level', 'images/level.png')
   }

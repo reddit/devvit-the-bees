@@ -35,8 +35,10 @@ export class Spawner {
   }
 
   killAll(): void {
-    for (const eid in this.#enemies) this.kill(eid as EID)
-    this.#enemies = {}
+    for (const eid in this.#enemies) {
+      this.kill(eid as EID)
+      delete this.#enemies[eid as EID]
+    }
   }
 
   spawn(scene: Shmup, y: number): Wasp[] {
@@ -86,7 +88,7 @@ export class Spawner {
           eid
         )
         wasps.push(wasp)
-        if (this.#enemies[eid]) throw Error('dup')
+        if (this.#enemies[eid]) console.error(`duplicate EID ${eid}`)
         this.#enemies[eid] = wasp
       }
     }

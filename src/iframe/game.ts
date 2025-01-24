@@ -5,6 +5,7 @@ import {
   peerDisconnectIntervalMillis,
   peerMaxSyncInterval
 } from '../shared/theme.ts'
+import {Throttle} from '../shared/throttle.ts'
 import type {XY} from '../shared/types/2d.ts'
 import {
   type DevvitMessage,
@@ -14,7 +15,7 @@ import {
 } from '../shared/types/message.ts'
 import type {Seed} from '../shared/types/seed.ts'
 import {SID} from '../shared/types/sid.ts'
-import {utcMillisNow} from '../shared/types/time.ts'
+import {type UTCMillis, utcMillisNow} from '../shared/types/time.ts'
 import {devProfiles} from './dev/dev-profiles.ts'
 import {postWebViewMessage} from './mail.ts'
 import {GameOver} from './scenes/game-over.ts'
@@ -126,7 +127,7 @@ export class Game {
       case 'Connected':
         if (this.store.debug)
           console.log(`${this.store.p1.player.profile.username} connected`)
-        this.#postP1PeerUpdated()
+        this.#postP1PeerUpdated.schedule(utcMillisNow())
         break
       case 'Disconnected':
         if (this.store.debug)
@@ -147,6 +148,14 @@ export class Game {
         break
       }
       case 'PeerUpdated':
+        // to-do: remove. why wasn't connect sent? was it missed?
+        if (!(msg.peer.sid in this.store.peers))
+          this.store.onPeerConnected({
+            player: msg.peer,
+            sync: msg.sync,
+            xy: msg.sync.xy
+          })
+
         this.store.peers[msg.peer.sid]!.sync = msg.sync
         this.store.onPeerUpdated(msg)
         break
@@ -156,6 +165,7 @@ export class Game {
   }
 
   #onP1XY(xy: Readonly<XY>): void {
+    const now = utcMillisNow()
     const significant =
       Phaser.Math.Distance.Between(
         this.store.p1.sync.xy.x,
@@ -163,19 +173,19 @@ export class Game {
         xy.x,
         xy.y
       ) > 5 ||
-      utcMillisNow() - this.store.p1.sync.time > peerMaxSyncInterval ||
+      now - this.store.p1.sync.time > peerMaxSyncInterval ||
       Object.keys(this.store.p1.sync.hits).length
     if (!significant) return
-    this.#postP1PeerUpdated()
+    this.#postP1PeerUpdated.schedule(now)
   }
 
   #onResize(): void {
     for (const scene of this.store.phaser.scene.getScenes()) centerCam(scene)
   }
 
-  #postP1PeerUpdated(): void {
+  #postP1PeerUpdated = new Throttle((now: UTCMillis): void => {
     // to-do: dir.
-    this.store.p1.sync.time = utcMillisNow()
+    this.store.p1.sync.time = now
     this.store.p1.sync.xy = this.store.p1.xy
     postWebViewMessage(this.store, {
       type: 'PeerUpdated',
@@ -184,7 +194,7 @@ export class Game {
       version: realtimeVersion
     })
     this.store.p1.sync.hits = {}
-  }
+  }, 300) // to-do: extract.
 }
 
 export function centerCam(scene: Phaser.Scene): void {
