@@ -1,26 +1,27 @@
 import {Devvit} from '@devvit/public-api'
-import {paletteBlack, paletteWhite} from '../../shared/theme.ts'
+import {paletteBlack} from '../../shared/theme.ts'
 
 export type TitleProps = {children?: JSX.Children}
 
 export function Title(props: Readonly<TitleProps>): JSX.Element {
   return (
+    // to-do:extract palette.
     <zstack
       alignment='top center'
-      backgroundColor={paletteWhite}
+      backgroundColor='#00a0ff'
       borderColor={paletteBlack}
       width='100%'
       height='100%'
     >
-      <vstack alignment='start' width='100%' padding='medium'>
-        <image
-          description='The Birds & The Bees'
-          url='logo.png'
-          imageWidth='600px'
-          imageHeight='342px'
-          resizeMode='scale-down'
-        />
-      </vstack>
+      <image
+        description='The Birds & The Bees'
+        url='logo.png'
+        imageWidth='500px'
+        imageHeight='352px'
+        width='100%'
+        height='100%'
+        resizeMode='fit'
+      />
       <vstack
         alignment='bottom end'
         padding='medium'
