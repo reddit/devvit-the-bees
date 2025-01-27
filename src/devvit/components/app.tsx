@@ -1,5 +1,5 @@
 // biome-ignore lint/style/useImportType: Devvit is a functional dependency of JSX.
-import {Devvit} from '@devvit/public-api'
+import {Devvit, useWebView} from '@devvit/public-api'
 import {ChannelStatus} from '@devvit/public-api/types/realtime'
 import {playButtonWidth} from '../../shared/theme.ts'
 import {
@@ -11,7 +11,6 @@ import {
 import {useChannel2} from '../hooks/use-channel2.js'
 import {useSession} from '../hooks/use-session.ts'
 import {useState2} from '../hooks/use-state2.ts'
-import {useWebView2} from '../hooks/use-web-view2.ts'
 import {redisQueryPostSave, redisQueryProfile} from '../redis.ts'
 import {Title} from './title.tsx'
 
@@ -25,7 +24,7 @@ export function App(ctx: Devvit.Context): JSX.Element {
     return postSave
   })
 
-  const webView = useWebView2<WebViewMessage, DevvitMessage>({
+  const webView = useWebView<WebViewMessage, DevvitMessage>({
     onMessage(msg) {
       // if (session.debug)
       //   console.log(`${profile.username} App msg=${JSON.stringify(msg)}`)
